@@ -1,39 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4EAE3">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>Ledger</title>
+<title>记账本</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 :root{
   --canvas:#E4EAE3; --paper:#F8FAF6; --ink:#18241E; --muted:#78877E;
   --line:#C9D3C6; --intake:#A87C15; --burn:#1D6B67; --warn:#8C4A2F;
+  --tabh:62px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{
-  font-family:'Archivo',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-family:system-ui,-apple-system,"PingFang SC","Noto Sans CJK SC","Source Han Sans SC",
+    "Microsoft YaHei",sans-serif;
   background:var(--canvas); color:var(--ink); min-height:100vh;
-  font-size:15px; line-height:1.4; -webkit-user-select:none; user-select:none;
-  padding-bottom:env(safe-area-inset-bottom);
+  font-size:15px; line-height:1.5; -webkit-user-select:none; user-select:none;
 }
-input,button,select{font-family:inherit;font-size:16px}
+input,button,select,textarea{font-family:inherit;font-size:16px}
 .num{font-variant-numeric:tabular-nums;
-  font-family:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace}
+  font-family:ui-monospace,"SF Mono","Roboto Mono",Menlo,monospace}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--burn);outline-offset:2px}
 
-.wrap{max-width:480px;margin:0 auto;padding:20px 16px 130px}
-.topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;gap:8px}
-.eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
-.date{font-size:17px;font-weight:600}
-.navs{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end}
-.chipbtn{background:none;border:1px solid var(--line);border-radius:9px;padding:6px 10px;
-  font-size:12px;color:var(--muted)}
-.chipbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.wrap{max-width:480px;margin:0 auto;
+  padding:16px 16px calc(var(--tabh) + 84px + env(safe-area-inset-bottom))}
+
+/* ---------- header ---------- */
+.head{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:42px}
+.backb{border:1px solid var(--line);background:var(--paper);border-radius:9px;
+  width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;padding:0}
+.head .titles{flex:1;min-width:0}
+.eyebrow{font-size:11px;letter-spacing:.1em;color:var(--muted)}
+.title{font-size:18px;font-weight:600}
+
+/* date stepper on the Today screen */
+.datenav{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.datenav button{border:1px solid var(--line);background:var(--paper);border-radius:9px;
+  width:36px;height:36px;display:grid;place-items:center;padding:0;flex:0 0 auto}
+.datenav button[disabled]{opacity:.35}
+.datenav .d{flex:1;text-align:center;font-size:14px;font-weight:600}
+.datenav .d small{display:block;font-size:11px;color:var(--muted);font-weight:400}
 
 .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px}
 .big{font-size:42px;font-weight:600;line-height:1.05}
@@ -41,16 +50,17 @@ button{cursor:pointer}
 .bar-track{height:9px;background:var(--line);border-radius:5px;overflow:hidden;margin-bottom:11px}
 .bar-fill{height:100%;border-radius:5px;transition:width .4s ease}
 
-h2.sec{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
-  font-weight:600;margin:26px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+h2.sec{font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:600;
+  margin:24px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
 .row{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--paper);
   border:1px solid var(--line);border-radius:10px;margin-bottom:6px}
+.rowb{width:100%;text-align:left}
 .row .body{flex:1;min-width:0}
 .row .name{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .sub{font-size:11px;color:var(--muted)}
 .row .kcal{font-weight:600;font-size:14px}
-.x{border:none;background:none;color:var(--muted);font-size:20px;line-height:1;padding:0 2px}
-.empty{font-size:14px;color:var(--muted);padding:14px 2px;line-height:1.5}
+.x{border:none;background:none;color:var(--muted);font-size:20px;line-height:1;padding:0 4px}
+.empty{font-size:14px;color:var(--muted);padding:14px 2px;line-height:1.6}
 
 .in{background:var(--paper);border:1px solid var(--line);color:var(--ink);
   border-radius:10px;padding:11px 12px;width:100%;-webkit-user-select:text;user-select:text}
@@ -63,40 +73,66 @@ label.f span{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
 .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
 .btn.gold{background:var(--intake)}
 .btn.teal{background:var(--burn)}
+.btn.danger{background:transparent;color:var(--warn);border:1px solid var(--warn)}
 
-.dock{position:fixed;bottom:0;left:0;right:0;
-  padding:14px 16px calc(24px + env(safe-area-inset-bottom));
-  background:linear-gradient(to top,var(--canvas) 62%,transparent)}
-.dock .wrap2{max-width:480px;margin:0 auto}
+/* ---------- bottom tab bar: 5 fixed columns, never wraps ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;
+  display:grid;grid-template-columns:repeat(5,1fr);
+  background:var(--paper);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{background:none;border:none;padding:8px 2px 9px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted)}
+.tabbar button.on{color:var(--burn)}
+.tabbar .lb{font-size:10px;line-height:1}
+.tabbar svg{width:21px;height:21px;display:block}
 
-.sheet-bg{position:fixed;inset:0;background:rgba(24,36,30,.5);z-index:50;display:flex;align-items:flex-end}
+.fab{position:fixed;left:0;right:0;z-index:39;
+  bottom:calc(var(--tabh) + 14px + env(safe-area-inset-bottom));
+  padding:0 16px;pointer-events:none}
+.fab .inner{max-width:480px;margin:0 auto;pointer-events:auto}
+.fab .btn{box-shadow:0 6px 18px rgba(24,36,30,.22)}
+
+/* when the soft keyboard is up, get out of the way */
+body.kb .tabbar,body.kb .fab{display:none}
+
+/* ---------- sheets & dialogs ---------- */
+.sheet-bg{position:fixed;inset:0;background:rgba(24,36,30,.5);z-index:50;
+  display:flex;align-items:flex-end}
 .sheet{background:var(--canvas);width:100%;max-height:93vh;overflow-y:auto;
-  border-radius:18px 18px 0 0;padding:20px 18px calc(30px + env(safe-area-inset-bottom))}
+  border-radius:18px 18px 0 0;padding:18px 18px calc(28px + env(safe-area-inset-bottom))}
 .sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .sheet-head h3{font-size:17px;font-weight:600}
 .tabs{display:flex;gap:6px;margin-bottom:16px}
 .tab{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);
   border-radius:9px;padding:9px 0;font-size:13px;font-weight:600}
 .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.hide{display:none!important}
+
+.dlg-bg{position:fixed;inset:0;background:rgba(24,36,30,.5);z-index:70;
+  display:flex;align-items:center;justify-content:center;padding:22px}
+.dlg{background:var(--canvas);border-radius:16px;padding:20px;width:100%;max-width:380px;
+  max-height:86vh;overflow-y:auto}
+.dlg h3{font-size:17px;font-weight:600;margin-bottom:6px}
+.dlg .msg{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.dlg .acts{display:flex;gap:8px;margin-top:6px}
+.dlg .acts .btn{flex:1}
 
 .pick{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--paper);
   border:1px solid var(--line);border-radius:10px;margin-bottom:6px;width:100%;text-align:left}
 .pick .body{flex:1;min-width:0}
-.grouphead{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-  margin:14px 0 6px;font-weight:600}
-.list{max-height:46vh;overflow-y:auto;margin-bottom:12px}
+.grouphead{font-size:11px;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;font-weight:600}
+.list{max-height:44vh;overflow-y:auto;margin-bottom:12px}
 .mult{display:flex;gap:6px;margin-bottom:12px}
 .mult button{flex:1;border:1px solid var(--line);background:var(--paper);color:var(--ink);
   border-radius:9px;padding:10px 0;font-size:14px}
 .mult button.on{background:var(--burn);color:#fff;border-color:var(--burn)}
 .two{display:flex;gap:10px}
 .two > *{flex:1}
-.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+.note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}
 .err{font-size:13px;color:var(--warn);margin-bottom:10px}
 .check{display:flex;align-items:center;gap:9px;margin-bottom:12px;font-size:14px;color:var(--muted)}
 .check input{width:19px;height:19px;accent-color:var(--burn)}
 .tag{font-size:11px;color:var(--burn);font-weight:600}
+.hide{display:none!important}
 
 .seg{display:flex;gap:8px;margin-bottom:14px}
 .seg button{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);
@@ -115,166 +151,174 @@ label.f span{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
 
 .setup{position:fixed;inset:0;background:var(--canvas);z-index:60;overflow-y:auto;padding:22px 16px}
 .setup .inner{max-width:480px;margin:0 auto}
-.spark{width:100%;height:110px;display:block}
+.spark{width:100%;height:112px;display:block;margin-top:10px}
 .callout{background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--burn);
   border-radius:10px;padding:14px;margin-bottom:10px}
-.callout.warn{border-left-color:var(--warn)}
 .callout h4{font-size:13px;font-weight:600;margin-bottom:6px}
-.callout p{font-size:13px;color:var(--muted);line-height:1.5}
+.callout p{font-size:13px;color:var(--muted);line-height:1.6}
 .stat{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;
   border-bottom:1px solid var(--line)}
 .stat:last-child{border-bottom:none}
 .stat .l{font-size:13px;color:var(--muted)}
 .stat .v{font-size:15px;font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabh) + 70px);
+  background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;
+  z-index:90;max-width:82%;text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
-<div class="dock" id="dock">
-  <div class="wrap2"><button class="btn" onclick="openAdd()">Add a meal</button></div>
-</div>
+<div class="fab hide" id="fab"><div class="inner">
+  <button class="btn" onclick="openAdd()">添加餐食</button></div></div>
+<nav class="tabbar" id="tabbar"></nav>
 <div id="sheet"></div>
+<div id="dlg"></div>
 <div id="setup"></div>
 
 <script>
 /* =====================================================================
-   LEDGER v2
-   Burn model: BMR (Mifflin-St Jeor) + active calories from your watch.
-   Calibration: compares logged intake against real weight change to
-   derive your actual TDEE, which beats any formula.
+   记账本 v3
+   本地运行,数据只存在这台手机上。
+   消耗模型:基础代谢(Mifflin-St Jeor) + 手表活动卡路里。
+   校准:用实际体重变化反推真实消耗,比任何公式都准。
    ===================================================================== */
 
-const KCAL_PER_KG = 7700;      // energy in ~1kg of body tissue
-const MIN_SPAN_DAYS = 14;      // shortest window worth trusting
-const FLOOR = { female: 1200, male: 1500 };
+const KCAL_PER_KG = 7700;   // 每公斤体组织约含的热量
+const MIN_SPAN = 14;        // 校准要求的最短跨度(天)
+const FLOOR = { female:1200, male:1500 };   // 建议目标下限
 
-/* ---------- built-in foods: [group, name, kcal, protein g] ---------- */
+/* ---------- 内置食物库:[分组, 名称, 热量, 蛋白质g] ---------- */
 const FOODS = [
-["Staples","White rice, 1 bowl (150g)",195,4],
-["Staples","Brown rice, 1 bowl (150g)",165,4],
-["Staples","Congee / rice porridge, 1 bowl",115,2],
-["Staples","Fried rice, 1 plate",450,12],
-["Staples","Wheat noodles, 1 bowl cooked",275,9],
-["Staples","Instant noodles, 1 pack",385,8],
-["Staples","Pasta, 1 cup cooked",220,8],
-["Staples","Bread, 1 slice white",80,3],
-["Staples","Bread, 1 slice whole wheat",80,4],
-["Staples","Steamed bun (mantou), 1",220,6],
-["Staples","Dumplings, 5 pieces pork",300,12],
-["Staples","Oatmeal, 1 cup cooked",155,6],
-["Staples","Potato, 1 medium boiled",145,3],
-["Staples","Sweet potato, 1 medium baked",130,2],
-["Staples","Tortilla, 1 medium flour",145,4],
-["Protein","Chicken breast, 100g cooked",165,31],
-["Protein","Chicken thigh, 100g cooked",210,26],
-["Protein","Beef, 100g lean cooked",250,26],
-["Protein","Pork, 100g cooked",240,27],
-["Protein","Salmon, 100g cooked",205,22],
-["Protein","White fish, 100g cooked",110,23],
-["Protein","Shrimp, 100g cooked",100,24],
-["Protein","Tuna, 1 can in water",130,29],
-["Protein","Tofu, firm, 100g",130,15],
-["Protein","Egg, 1 large boiled",72,6],
-["Protein","Egg, 1 fried",90,6],
-["Protein","Bacon, 2 slices",90,6],
-["Protein","Sausage, 1 link",150,8],
-["Protein","Ham, 2 slices",60,10],
-["Protein","Lentils, 1 cup cooked",230,18],
-["Protein","Black beans, 1 cup cooked",227,15],
-["Protein","Chickpeas, 1 cup cooked",270,15],
-["Dairy","Milk, 1 cup whole",150,8],
-["Dairy","Milk, 1 cup skim",85,8],
-["Dairy","Greek yogurt, plain, 170g",100,17],
-["Dairy","Yogurt, plain, 170g",105,9],
-["Dairy","Soy milk, 1 cup unsweetened",80,7],
-["Dairy","Cheddar cheese, 30g",115,7],
-["Dairy","Mozzarella, 30g",85,6],
-["Dairy","Butter, 1 tbsp",100,0],
-["Dairy","Cream cheese, 2 tbsp",100,2],
-["Fruit","Apple, 1 medium",95,0],
-["Fruit","Banana, 1 medium",105,1],
-["Fruit","Orange, 1 medium",62,1],
-["Fruit","Pear, 1 medium",100,1],
-["Fruit","Grapes, 1 cup",104,1],
-["Fruit","Strawberries, 1 cup",49,1],
-["Fruit","Blueberries, 1 cup",84,1],
-["Fruit","Watermelon, 1 cup",46,1],
-["Fruit","Mango, 1 cup",99,1],
-["Fruit","Avocado, half",160,2],
-["Vegetables","Broccoli, 1 cup cooked",55,4],
-["Vegetables","Spinach, 1 cup raw",7,1],
-["Vegetables","Bok choy, 1 cup cooked",20,3],
-["Vegetables","Carrot, 1 medium",25,1],
-["Vegetables","Tomato, 1 medium",22,1],
-["Vegetables","Cucumber, half",20,1],
-["Vegetables","Green beans, 1 cup",44,2],
-["Vegetables","Corn, 1 cup",130,5],
-["Vegetables","Mixed salad, 2 cups no dressing",20,2],
-["Vegetables","Stir-fried vegetables, 1 plate",120,4],
-["Nuts & fats","Almonds, 30g",170,6],
-["Nuts & fats","Peanuts, 30g",165,7],
-["Nuts & fats","Walnuts, 30g",185,4],
-["Nuts & fats","Peanut butter, 2 tbsp",190,8],
-["Nuts & fats","Olive oil, 1 tbsp",120,0],
-["Nuts & fats","Cooking oil, 1 tbsp",120,0],
-["Drinks","Black coffee",5,0],
-["Drinks","Tea, plain",2,0],
-["Drinks","Latte, medium",190,10],
-["Drinks","Orange juice, 1 cup",112,2],
-["Drinks","Soda, 1 can",140,0],
-["Drinks","Sports drink, 1 bottle",125,0],
-["Drinks","Bubble tea, medium",350,5],
-["Drinks","Beer, 1 bottle",150,2],
-["Drinks","Wine, 1 glass",125,0],
-["Meals out","Hamburger, plain",250,12],
-["Meals out","Cheeseburger",300,15],
-["Meals out","Large burger",520,30],
-["Meals out","French fries, medium",340,4],
-["Meals out","Pizza, 1 slice cheese",285,12],
-["Meals out","Fried chicken, 1 piece",320,22],
-["Meals out","Turkey sandwich",350,20],
-["Meals out","Sushi roll, 6 pieces",250,9],
-["Meals out","Ramen, 1 bowl",500,20],
-["Meals out","Pho, 1 bowl",400,25],
-["Meals out","Burrito",600,25],
-["Meals out","Caesar salad with chicken",400,30],
-["Snacks","Potato chips, small bag",155,2],
-["Snacks","Chocolate bar, 45g",235,3],
-["Snacks","Cookie, 1 medium",80,1],
-["Snacks","Ice cream, half cup",140,2],
-["Snacks","Donut, glazed",250,3],
-["Snacks","Cake, 1 slice",350,4],
-["Snacks","Popcorn, 3 cups plain",90,3],
-["Snacks","Protein bar",200,20]
+["主食","白米饭 1碗(150g)",195,4],
+["主食","糙米饭 1碗(150g)",165,4],
+["主食","白粥 1碗",115,2],
+["主食","炒饭 1盘",450,12],
+["主食","面条 1碗(熟)",275,9],
+["主食","方便面 1包",385,8],
+["主食","意面 1杯(熟)",220,8],
+["主食","白面包 1片",80,3],
+["主食","全麦面包 1片",80,4],
+["主食","馒头 1个",220,6],
+["主食","猪肉饺子 5个",300,12],
+["主食","燕麦粥 1碗",155,6],
+["主食","土豆 1个(水煮)",145,3],
+["主食","红薯 1个(烤)",130,2],
+["主食","玉米饼 1张",145,4],
+["蛋白","鸡胸肉 100g(熟)",165,31],
+["蛋白","鸡腿肉 100g(熟)",210,26],
+["蛋白","瘦牛肉 100g(熟)",250,26],
+["蛋白","猪肉 100g(熟)",240,27],
+["蛋白","三文鱼 100g(熟)",205,22],
+["蛋白","白身鱼 100g(熟)",110,23],
+["蛋白","虾 100g(熟)",100,24],
+["蛋白","金枪鱼罐头(水浸) 1罐",130,29],
+["蛋白","北豆腐 100g",130,15],
+["蛋白","鸡蛋 1个(水煮)",72,6],
+["蛋白","煎蛋 1个",90,6],
+["蛋白","培根 2片",90,6],
+["蛋白","香肠 1根",150,8],
+["蛋白","火腿 2片",60,10],
+["蛋白","扁豆 1杯(熟)",230,18],
+["蛋白","黑豆 1杯(熟)",227,15],
+["蛋白","鹰嘴豆 1杯(熟)",270,15],
+["乳制品","全脂牛奶 1杯",150,8],
+["乳制品","脱脂牛奶 1杯",85,8],
+["乳制品","希腊酸奶(原味) 170g",100,17],
+["乳制品","酸奶(原味) 170g",105,9],
+["乳制品","无糖豆浆 1杯",80,7],
+["乳制品","切达奶酪 30g",115,7],
+["乳制品","马苏里拉奶酪 30g",85,6],
+["乳制品","黄油 1汤匙",100,0],
+["乳制品","奶油奶酪 2汤匙",100,2],
+["水果","苹果 1个",95,0],
+["水果","香蕉 1根",105,1],
+["水果","橙子 1个",62,1],
+["水果","梨 1个",100,1],
+["水果","葡萄 1杯",104,1],
+["水果","草莓 1杯",49,1],
+["水果","蓝莓 1杯",84,1],
+["水果","西瓜 1杯",46,1],
+["水果","芒果 1杯",99,1],
+["水果","牛油果 半个",160,2],
+["蔬菜","西兰花 1杯(熟)",55,4],
+["蔬菜","菠菜 1杯(生)",7,1],
+["蔬菜","青菜 1杯(熟)",20,3],
+["蔬菜","胡萝卜 1根",25,1],
+["蔬菜","番茄 1个",22,1],
+["蔬菜","黄瓜 半根",20,1],
+["蔬菜","四季豆 1杯",44,2],
+["蔬菜","玉米粒 1杯",130,5],
+["蔬菜","沙拉(不加酱) 2杯",20,2],
+["蔬菜","炒时蔬 1盘",120,4],
+["坚果油脂","杏仁 30g",170,6],
+["坚果油脂","花生 30g",165,7],
+["坚果油脂","核桃 30g",185,4],
+["坚果油脂","花生酱 2汤匙",190,8],
+["坚果油脂","橄榄油 1汤匙",120,0],
+["坚果油脂","食用油 1汤匙",120,0],
+["饮料","黑咖啡",5,0],
+["饮料","清茶",2,0],
+["饮料","拿铁(中杯)",190,10],
+["饮料","橙汁 1杯",112,2],
+["饮料","可乐 1罐",140,0],
+["饮料","运动饮料 1瓶",125,0],
+["饮料","奶茶(中杯)",350,5],
+["饮料","啤酒 1瓶",150,2],
+["饮料","红酒 1杯",125,0],
+["外食","汉堡(原味)",250,12],
+["外食","芝士汉堡",300,15],
+["外食","大份汉堡",520,30],
+["外食","薯条(中份)",340,4],
+["外食","芝士披萨 1块",285,12],
+["外食","炸鸡 1块",320,22],
+["外食","火鸡三明治",350,20],
+["外食","寿司卷 6个",250,9],
+["外食","拉面 1碗",500,20],
+["外食","越南粉 1碗",400,25],
+["外食","墨西哥卷饼",600,25],
+["外食","凯撒鸡肉沙拉",400,30],
+["零食","薯片 1小包",155,2],
+["零食","巧克力 45g",235,3],
+["零食","曲奇 1块",80,1],
+["零食","冰淇淋 半杯",140,2],
+["零食","甜甜圈",250,3],
+["零食","蛋糕 1块",350,4],
+["零食","爆米花(原味) 3杯",90,3],
+["零食","蛋白棒",200,20]
 ];
 
-/* ---------- storage ---------- */
+/* ---------- 存储 ---------- */
 const K = { profile:"cl.profile", mine:"cl.mine", hist:"cl.history",
             weights:"cl.weights", day:d=>"cl.day."+d };
 function load(k,f){ try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;} }
 function save(k,v){ try{localStorage.setItem(k,JSON.stringify(v));return true;}
-  catch(e){alert("Couldn't save \u2014 storage may be full.");return false;} }
+  catch(e){ toast("保存失败,存储空间可能已满"); return false; } }
 
-const todayKey = () => { const d=new Date();
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const pad=x=>String(x).padStart(2,"0");
+const keyOf = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const todayKey = () => keyOf(new Date());
 const dParse = k => { const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); };
-const prettyDate = k => dParse(k).toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
-const shortDate  = k => dParse(k).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+const shiftKey = (k,n) => keyOf(new Date(dParse(k).getTime()+n*86400000));
 const daysBetween = (a,b) => Math.round((dParse(b)-dParse(a))/86400000);
+const WD = ["周日","周一","周二","周三","周四","周五","周六"];
+const cnDate = k => { const d=dParse(k); return (d.getMonth()+1)+"月"+d.getDate()+"日"; };
+const cnFull = k => { const d=dParse(k); return cnDate(k)+" "+WD[d.getDay()]; };
 const uid = () => Math.random().toString(36).slice(2,9);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const n = v => Math.max(0,Math.round(Number(v)||0));
 const f1 = v => (Math.round(v*10)/10).toFixed(1);
 
-/* ---------- state ---------- */
+/* ---------- 状态 ---------- */
 let profile = load(K.profile,null);
 let mine    = load(K.mine,[]);
 let history = load(K.hist,{});
 let weights = load(K.weights,[]);
-let day     = load(K.day(todayKey()),null) || {date:todayKey(),food:[],watchActive:0,burn:[]};
+let curDate = todayKey();
+let day     = loadDay(curDate);
 let view    = "today";
 
+function loadDay(k){ return load(K.day(k),null) || {date:k,food:[],watchActive:0,burn:[]}; }
 function bmr(){
   if(!profile||!profile.weightKg||!profile.heightCm||!profile.age) return 0;
   const b = 10*profile.weightKg + 6.25*profile.heightCm - 5*profile.age;
@@ -286,8 +330,10 @@ const burned  = () => bmr() + (day.watchActive||0) + day.burn.reduce((s,b)=>s+b.
 const target  = () => (profile && profile.target) ? profile.target : 0;
 
 function persist(){
-  save(K.day(day.date), day);
-  history[day.date] = { in:eaten(), out:burned(), p:protein(), act:day.watchActive||0 };
+  const empty = !day.food.length && !day.watchActive && !day.burn.length;
+  if(empty){ try{localStorage.removeItem(K.day(day.date));}catch(e){} delete history[day.date]; }
+  else { save(K.day(day.date), day);
+    history[day.date] = { in:eaten(), out:burned(), p:protein(), act:day.watchActive||0 }; }
   save(K.hist,history);
   render();
 }
@@ -295,164 +341,276 @@ function rememberFood(name,kcal,p){
   if(!name) return;
   const key = name.trim().toLowerCase();
   const i = mine.findIndex(f=>f.name.trim().toLowerCase()===key);
-  const rec = { id: i>-1?mine[i].id:uid(), name:name.trim(), kcal, protein:p };
+  const rec = { id: i>-1?mine[i].id:uid(), name:name.trim(), kcal, protein:p, used:Date.now() };
   if(i>-1) mine[i]=rec; else mine.unshift(rec);
   save(K.mine,mine);
 }
+function touchFood(name){
+  const i = mine.findIndex(f=>f.name.trim().toLowerCase()===String(name).trim().toLowerCase());
+  if(i>-1){ mine[i].used = Date.now(); save(K.mine,mine); }
+}
 
 /* =====================================================================
-   CALIBRATION  — the core idea:
-   If you ate an average of A per day over N days and your weight changed
-   by D kg, then your true daily burn was A - (D * 7700 / N).
+   导航栈 —— 支持系统返回键和应用内返回
+   ===================================================================== */
+let stack = [];
+function pushNav(undo){
+  stack.push(undo);
+  try{ history.pushState({d:stack.length},""); }catch(e){}
+}
+function popNav(){ const u=stack.pop(); if(u) u(); }
+function goBack(){
+  if(!stack.length) return false;
+  try{ window.history.back(); }catch(e){ popNav(); }
+  return true;
+}
+window.addEventListener("popstate", () => { const u=stack.pop(); if(u) u(); });
+
+/* =====================================================================
+   对话框 —— 取代系统的 prompt / alert / confirm
+   ===================================================================== */
+let dlgFields = [];
+function closeDlg(silent){
+  document.getElementById("dlg").innerHTML="";
+  dlgFields=[];
+  if(!silent) {}
+}
+function showDlg(html){
+  document.getElementById("dlg").innerHTML =
+    `<div class="dlg-bg" onclick="if(event.target===this)dismissDlg()"><div class="dlg">${html}</div></div>`;
+  pushNav(()=>closeDlg(true));
+  const first = document.querySelector("#dlg input");
+  if(first) setTimeout(()=>first.focus(),120);
+}
+function dismissDlg(){ goBack() || closeDlg(true); }
+
+/** 提示,只有一个"好"按钮 */
+function say(msg,title){
+  showDlg(`<h3>${esc(title||"提示")}</h3><div class="msg">${esc(msg)}</div>
+    <div class="acts"><button class="btn" onclick="dismissDlg()">好</button></div>`);
+}
+/** 确认 */
+let confirmCb=null;
+function ask(msg,title,onYes,danger){
+  confirmCb=onYes;
+  showDlg(`<h3>${esc(title||"确认")}</h3><div class="msg">${esc(msg)}</div>
+    <div class="acts"><button class="btn ghost" onclick="dismissDlg()">取消</button>
+    <button class="btn ${danger?"danger":""}" onclick="runConfirm()">确定</button></div>`);
+}
+function runConfirm(){ const cb=confirmCb; confirmCb=null; dismissDlg(); if(cb) setTimeout(cb,10); }
+
+/**
+ * 表单对话框
+ * fields: [{k, label, type:'text|number|date', value, ph, step}]
+ */
+let formCb=null;
+function form(title,fields,onOk,okLabel){
+  dlgFields=fields; formCb=onOk;
+  const body = fields.map(f=>`<label class="f"><span>${esc(f.label)}</span>
+    <input class="in ${f.type==="number"?"num":""}" id="fld_${f.k}" type="${f.type||"text"}"
+      ${f.type==="number"?'inputmode="decimal"':""} ${f.step?`step="${f.step}"`:""}
+      value="${esc(f.value==null?"":f.value)}" placeholder="${esc(f.ph||"")}"></label>`).join("");
+  showDlg(`<h3>${esc(title)}</h3>${body}<div class="err hide" id="fld_err"></div>
+    <div class="acts"><button class="btn ghost" onclick="dismissDlg()">取消</button>
+    <button class="btn teal" onclick="submitForm()">${esc(okLabel||"保存")}</button></div>`);
+}
+function formError(msg){
+  const e=document.getElementById("fld_err");
+  if(e){ e.textContent=msg; e.classList.remove("hide"); }
+}
+function submitForm(){
+  const out={};
+  dlgFields.forEach(f=>{ const el=document.getElementById("fld_"+f.k); out[f.k]= el?el.value:""; });
+  const cb=formCb;
+  if(cb && cb(out)!==false){ formCb=null; dismissDlg(); }
+}
+function toast(msg){
+  const el=document.createElement("div");
+  el.className="toast"; el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2200);
+}
+
+/* =====================================================================
+   校准
+   真实消耗 = 区间平均摄入 − (体重变化kg × 7700 ÷ 天数)
    ===================================================================== */
 function calibrate(){
   const w = weights.slice().sort((a,b)=>a.date<b.date?-1:1);
-  if(w.length < 2) return { ok:false, reason:"need2", have:w.length };
-
-  const first = w[0], last = w[w.length-1];
-  const span = daysBetween(first.date, last.date);
-  if(span < MIN_SPAN_DAYS) return { ok:false, reason:"short", span:span };
-
-  // logged intake days that fall inside the window
-  const days = Object.keys(history).filter(k =>
-    k >= first.date && k <= last.date && history[k].in > 0);
-  const coverage = days.length / span;
-  if(coverage < 0.6) return { ok:false, reason:"sparse", logged:days.length, span:span };
-
-  const avgIn  = days.reduce((s,k)=>s+history[k].in,0) / days.length;
-  const avgOut = days.reduce((s,k)=>s+history[k].out,0) / days.length;
+  if(w.length < 2) return {ok:false,reason:"need2",have:w.length};
+  const first=w[0], last=w[w.length-1];
+  const span = daysBetween(first.date,last.date);
+  if(span < MIN_SPAN) return {ok:false,reason:"short",span};
+  const days = Object.keys(history).filter(k=>k>=first.date && k<=last.date && history[k].in>0);
+  const coverage = days.length/span;
+  if(coverage < 0.6) return {ok:false,reason:"sparse",logged:days.length,span};
+  const avgIn  = days.reduce((s,k)=>s+history[k].in,0)/days.length;
+  const avgOut = days.reduce((s,k)=>s+history[k].out,0)/days.length;
   const deltaKg = last.kg - first.kg;
-  const realTDEE = Math.round(avgIn - (deltaKg * KCAL_PER_KG / span));
-
+  const realTDEE = Math.round(avgIn - (deltaKg*KCAL_PER_KG/span));
   return { ok:true, span, days:days.length, coverage,
-    avgIn:Math.round(avgIn), avgOut:Math.round(avgOut),
-    deltaKg, realTDEE, gap: realTDEE - Math.round(avgOut),
-    perWeek: deltaKg / (span/7) };
+    avgIn:Math.round(avgIn), avgOut:Math.round(avgOut), deltaKg,
+    realTDEE, gap: realTDEE - Math.round(avgOut), perWeek: deltaKg/(span/7) };
 }
-function suggestTarget(realTDEE, rateKgWeek){
-  const raw = Math.round(realTDEE - (rateKgWeek * KCAL_PER_KG / 7));
-  const floor = FLOOR[(profile&&profile.sex)==="male" ? "male" : "female"];
-  return { value: Math.max(raw, floor), clamped: raw < floor, floor };
+function suggestTarget(tdee,rate){
+  const raw = Math.round(tdee - (rate*KCAL_PER_KG/7));
+  const floor = FLOOR[(profile&&profile.sex)==="male"?"male":"female"];
+  return { value:Math.max(raw,floor), clamped: raw<floor, floor };
 }
-/* smoothed weight trend — daily noise is bigger than the signal */
 function trend(){
   const w = weights.slice().sort((a,b)=>a.date<b.date?-1:1);
-  return w.map((pt,i) => {
-    const win = w.slice(Math.max(0,i-6), i+1);
-    return { date:pt.date, kg:pt.kg, avg: win.reduce((s,x)=>s+x.kg,0)/win.length };
-  });
+  return w.map((pt,i)=>{ const win=w.slice(Math.max(0,i-6),i+1);
+    return {date:pt.date, kg:pt.kg, avg: win.reduce((s,x)=>s+x.kg,0)/win.length}; });
 }
 
 /* =====================================================================
-   VIEWS
+   渲染
    ===================================================================== */
+const ICONS = {
+  today:'<path d="M3 9h18M7 3v3M17 3v3M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>',
+  weight:'<path d="M12 6a3 3 0 100-2 3 3 0 000 2zM5 21h14l-2-11H7L5 21z"/>',
+  tune:'<path d="M4 20V10M12 20V4M20 20v-6M1 10h6M9 4h6M17 14h6"/>',
+  history:'<path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.7L3 8M3 3v5h5M12 7v5l3 2"/>',
+  settings:'<path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19 12a7 7 0 00-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 00-1.7-1L14.4 3H9.6l-.4 2.6a7 7 0 00-1.7 1l-2.4-1-2 3.4L5.1 11a7 7 0 000 2l-2 1.6 2 3.4 2.4-1a7 7 0 001.7 1l.4 2.6h4.8l.4-2.6a7 7 0 001.7-1l2.4 1 2-3.4-2-1.6a7 7 0 00.1-1z"/>'
+};
+const TABS = [["today","今天"],["weight","体重"],["tune","校准"],["history","记录"],["settings","设置"]];
+
 function render(){
-  document.getElementById("dock").className = view==="today" ? "dock" : "dock hide";
-  const titles = { today:["Today",prettyDate(day.date)], weight:["Weight","Your trend"],
-    tune:["Calibration","What your body actually says"], history:["Record","Your history"],
-    settings:["Settings","Your setup"] };
-  const t = titles[view];
-  document.getElementById("app").innerHTML = `
-    <div class="topbar">
-      <div><div class="eyebrow">${t[0]}</div><div class="date">${t[1]}</div></div>
-      <div class="navs">
-        <button class="chipbtn ${view==="weight"?"on":""}" onclick="go('weight')">Weight</button>
-        <button class="chipbtn ${view==="tune"?"on":""}" onclick="go('tune')">Calibrate</button>
-        <button class="chipbtn ${view==="history"?"on":""}" onclick="go('history')">History</button>
-        <button class="chipbtn ${view==="settings"?"on":""}" onclick="go('settings')">Settings</button>
-      </div>
+  document.getElementById("tabbar").innerHTML = TABS.map(([k,label])=>
+    `<button class="${view===k?"on":""}" onclick="tabTo('${k}')" aria-label="${label}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>
+      <span class="lb">${label}</span></button>`).join("");
+  document.getElementById("fab").className = view==="today" ? "fab" : "fab hide";
+
+  const T = { today:["记账本",cnFull(curDate)], weight:["体重","趋势"],
+    tune:["校准","你身体给出的真实数字"], history:["记录","历史"], settings:["设置","偏好与备份"] }[view];
+  const showBack = view!=="today";
+  document.getElementById("app").innerHTML =
+    `<div class="head">
+      ${showBack?`<button class="backb" onclick="tabTo('today')" aria-label="返回">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/></svg></button>`:""}
+      <div class="titles"><div class="eyebrow">${T[0]}</div><div class="title">${T[1]}</div></div>
     </div>` +
-    ({today:todayView, weight:weightView, tune:tuneView,
-      history:histView, settings:setView}[view])();
+    ({today:todayView,weight:weightView,tune:tuneView,history:histView,settings:setView}[view])();
 }
-function go(v){ view = (view===v)?"today":v; render(); window.scrollTo(0,0); }
+function tabTo(v){
+  if(v===view){ if(view==="today") jumpToday(); return; }
+  const prev=view;
+  if(v!=="today") pushNav(()=>{ view=prev; render(); });
+  view=v; render(); window.scrollTo(0,0);
+}
 
-function row(name,sub,val,color,onDel){
-  return `<div class="row"><div class="body"><div class="name">${esc(name)}</div>
+function row(name,sub,val,color,onDel,onTap){
+  const inner=`<div class="body"><div class="name">${esc(name)}</div>
     ${sub?`<div class="sub">${esc(sub)}</div>`:""}</div>
-    <span class="kcal num" style="color:${color||"var(--ink)"}">${val}</span>
-    ${onDel?`<button class="x" onclick="${onDel}" aria-label="Remove">\u00d7</button>`:""}</div>`;
+    <span class="kcal num" style="color:${color||"var(--ink)"}">${val}</span>`;
+  if(onTap) return `<div class="row" style="padding:0">
+    <button class="rowb" onclick="${onTap}" style="display:flex;align-items:center;gap:10px;
+      background:none;border:none;padding:11px 4px 11px 13px;flex:1;min-width:0">${inner}</button>
+    ${onDel?`<button class="x" style="padding:11px 13px 11px 4px" onclick="${onDel}" aria-label="删除">×</button>`:""}</div>`;
+  return `<div class="row">${inner}
+    ${onDel?`<button class="x" onclick="${onDel}" aria-label="删除">×</button>`:""}</div>`;
 }
 
+/* ---------- 今天 ---------- */
 function todayView(){
   const e=eaten(), b=burned(), net=e-b, span=Math.max(e,b,1);
   const showP = profile&&profile.showProtein, tg=target();
-  let html = `<div class="card">`;
+  const isToday = curDate===todayKey();
 
+  let html = `<div class="datenav">
+    <button onclick="stepDay(-1)" aria-label="前一天">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="d">${cnFull(curDate)}<small>${isToday?"今天":"点两侧箭头切换日期"}</small></div>
+    <button onclick="stepDay(1)" ${isToday?"disabled":""} aria-label="后一天">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>`;
+
+  html += `<div class="card">`;
   if(tg){
     const left = tg-e;
-    html += `<div class="eyebrow">${left>=0?"Left to eat today":"Over target"}</div>
+    html += `<div class="eyebrow">${left>=0?"今天还能吃":"已超出目标"}</div>
       <div class="big num" style="color:${left>=0?"var(--burn)":"var(--warn)"};margin-bottom:6px">
         ${Math.abs(left).toLocaleString()}</div>
-      <div class="note" style="margin:0 0 16px">
-        ${e.toLocaleString()} of ${tg.toLocaleString()} eaten</div>`;
+      <div class="note" style="margin:0 0 16px">目标 ${tg.toLocaleString()},已摄入 ${e.toLocaleString()}</div>`;
   } else {
-    html += `<div class="eyebrow">${net>=0?"Surplus":"Deficit"}</div>
+    html += `<div class="eyebrow">${net>=0?"盈余":"缺口"}</div>
       <div class="big num" style="color:${net>=0?"var(--intake)":"var(--burn)"};margin-bottom:16px">
-        ${net>=0?"+":"\u2212"}${Math.abs(net).toLocaleString()}</div>`;
+        ${net>=0?"+":"−"}${Math.abs(net).toLocaleString()}</div>`;
   }
-
-  html += `<div class="bar-label"><span class="eyebrow">Eaten</span>
+  html += `<div class="bar-label"><span class="eyebrow">摄入</span>
       <span class="num" style="color:var(--intake);font-size:13px;font-weight:600">${e.toLocaleString()}</span></div>
     <div class="bar-track"><div class="bar-fill" style="width:${e/span*100}%;background:var(--intake)"></div></div>
-    <div class="bar-label"><span class="eyebrow">Burned</span>
+    <div class="bar-label"><span class="eyebrow">消耗</span>
       <span class="num" style="color:var(--burn);font-size:13px;font-weight:600">${b.toLocaleString()}</span></div>
     <div class="bar-track" style="margin-bottom:0">
       <div class="bar-fill" style="width:${b/span*100}%;background:var(--burn)"></div></div>
-    ${tg?`<div class="note">Balance today: ${net>=0?"+":"\u2212"}${Math.abs(net).toLocaleString()}</div>`:""}
-    ${showP?`<div class="note">Protein: <b class="num">${protein()}g</b></div>`:""}
-  </div>`;
+    ${tg?`<div class="note">今日结余 ${net>=0?"+":"−"}${Math.abs(net).toLocaleString()}</div>`:""}
+    ${showP?`<div class="note">蛋白质 <b class="num">${protein()}g</b></div>`:""}</div>`;
 
-  html += `<h2 class="sec"><span>Burned</span><span class="num" style="color:var(--burn)">${b.toLocaleString()}</span></h2>`;
-  html += row("Resting burn","Breathing, thinking, digesting \u2014 all day",bmr().toLocaleString(),"var(--burn)");
-  html += `<div class="row"><div class="body"><div class="name">Active calories</div>
-    <div class="sub">From your watch \u2014 the active/move number, not total</div></div>
-    <input class="in num" type="number" inputmode="numeric" placeholder="0"
-      style="width:84px;padding:7px 9px;text-align:right"
-      value="${day.watchActive||""}" onchange="setActive(this.value)"></div>`;
-  day.burn.forEach(x=>{ html += row(x.label,null,x.kcal.toLocaleString(),"var(--burn)",`delBurn('${x.id}')`); });
-  html += `<button class="btn ghost" style="margin-top:6px" onclick="openBurn()">Add another workout</button>`;
+  html += `<h2 class="sec"><span>消耗</span><span class="num" style="color:var(--burn)">${b.toLocaleString()}</span></h2>`;
+  html += row("基础代谢","呼吸、思考、消化、细胞修复,全天",bmr().toLocaleString(),"var(--burn)");
+  html += `<div class="row"><div class="body"><div class="name">手表活动卡路里</div>
+    <div class="sub">填「活动/Move」那个数,不要填总计</div></div>
+    <button onclick="editActive()" style="border:1px solid var(--line);
+      background:var(--paper);border-radius:9px;padding:8px 14px;font-size:15px;font-weight:600;
+      flex:0 0 auto;color:${day.watchActive?"var(--burn)":"var(--muted)"}"
+      class="num">${day.watchActive? day.watchActive.toLocaleString() : "填写"}</button></div>`;
+  day.burn.forEach(x=>{ html += row(x.label,null,x.kcal.toLocaleString(),"var(--burn)",
+    `delBurn('${x.id}')`,`editBurn('${x.id}')`); });
+  html += `<button class="btn ghost" style="margin-top:6px" onclick="addBurn()">添加运动</button>`;
 
-  html += `<h2 class="sec"><span>Eaten</span><span class="num" style="color:var(--intake)">${e.toLocaleString()}</span></h2>`;
-  if(!day.food.length) html += `<div class="empty">Nothing logged yet. Tap "Add a meal" to start.</div>`;
-  else day.food.forEach(f => html += row(f.name,
-    showP&&f.protein ? f.protein+"g protein" : null,
-    f.kcal.toLocaleString(),"var(--intake)",`delFood('${f.id}')`));
+  html += `<h2 class="sec"><span>摄入</span><span class="num" style="color:var(--intake)">${e.toLocaleString()}</span></h2>`;
+  if(!day.food.length) html += `<div class="empty">还没有记录。点下方「添加餐食」开始。</div>`;
+  else day.food.forEach(f=>html += row(f.name,
+    showP&&f.protein?f.protein+"g 蛋白质":"点击可修改",
+    f.kcal.toLocaleString(),"var(--intake)",`delFood('${f.id}')`,`editFood('${f.id}')`));
   return html;
 }
+function stepDay(d){
+  const nk = shiftKey(curDate,d);
+  if(daysBetween(nk,todayKey())<0) return;   // 不能记未来
+  curDate=nk; day=loadDay(curDate); render(); window.scrollTo(0,0);
+}
+function jumpToday(){ if(curDate!==todayKey()){ curDate=todayKey(); day=loadDay(curDate); render(); } }
 
+/* ---------- 体重 ---------- */
 function weightView(){
-  const t = trend();
-  let html = "";
+  const t=trend();
+  let html="";
   if(t.length){
-    const last = t[t.length-1];
-    let sub = "";
+    const last=t[t.length-1];
+    let sub="持续称重才能画出趋势";
     if(t.length>1){
-      const d = last.avg - t[0].avg, sp = daysBetween(t[0].date,last.date);
-      if(sp>0) sub = `${d>=0?"+":"\u2212"}${f1(Math.abs(d))} kg over ${sp} days`;
+      const d=last.avg-t[0].avg, sp=daysBetween(t[0].date,last.date);
+      if(sp>0) sub=`${sp} 天内 ${d>=0?"增加":"减少"} ${f1(Math.abs(d))} kg`;
     }
     html += `<div class="card" style="margin-bottom:10px">
-      <div class="eyebrow">Trend weight</div>
-      <div class="big num" style="margin-bottom:4px">${f1(last.avg)} <span style="font-size:15px;color:var(--muted)">kg</span></div>
-      <div class="note" style="margin:0">${sub||"Keep weighing in to build a trend"}</div>
-      ${spark(t)}</div>`;
+      <div class="eyebrow">趋势体重</div>
+      <div class="big num" style="margin-bottom:4px">${f1(last.avg)}
+        <span style="font-size:15px;color:var(--muted)">kg</span></div>
+      <div class="note" style="margin:0">${sub}</div>${spark(t)}</div>`;
   }
-  html += `<button class="btn teal" onclick="openWeigh()">Add a weigh-in</button>`;
-  html += `<div class="note">Weigh yourself at the same time of day, ideally first thing.
-    Day-to-day swings from water and food are far bigger than real fat change \u2014
-    the smoothed line is the one to read, not the dots.</div>`;
-
-  html += `<h2 class="sec">Weigh-ins</h2>`;
-  if(!weights.length) html += `<div class="empty">No weigh-ins yet. Two, at least two weeks apart,
-    unlock calibration.</div>`;
-  else weights.slice().sort((a,b)=>a.date<b.date?1:-1).forEach(w =>
-    html += row(shortDate(w.date),null,f1(w.kg)+" kg","var(--ink)",`delWeight('${w.date}')`));
+  html += `<button class="btn teal" onclick="addWeight()">记录体重</button>
+    <div class="note">尽量固定时间称,最好是早上起床后。
+      日常水分和食物造成的波动远大于真正的脂肪变化 —— 看那条实线,不要看散点。</div>`;
+  html += `<h2 class="sec">全部记录 <span style="font-weight:400">${weights.length} 条</span></h2>`;
+  if(!weights.length) html += `<div class="empty">还没有记录。<br>
+    以前自己记过的数据也可以补录进来 —— 记录时能选日期。<br>
+    有两条相隔 14 天以上的记录,校准功能就能用了。</div>`;
+  else weights.slice().sort((a,b)=>a.date<b.date?1:-1).forEach(w=>
+    html += row(cnFull(w.date),"点击可修改",f1(w.kg)+" kg","var(--ink)",
+      `delWeight('${w.date}')`,`editWeight('${w.date}')`));
   return html;
 }
-
 function spark(t){
   if(t.length<2) return "";
-  const W=440,H=110,P=8;
+  const W=440,H=112,P=10;
   const xs=t.map(p=>dParse(p.date).getTime());
   const all=t.map(p=>p.kg).concat(t.map(p=>p.avg));
   const lo=Math.min(...all), hi=Math.max(...all), rng=(hi-lo)||1;
@@ -460,167 +618,254 @@ function spark(t){
   const y=v=>H-P-((v-lo)/rng)*(H-2*P);
   const line=t.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(p.avg).toFixed(1)}`).join(" ");
   const dots=t.map((p,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(p.kg).toFixed(1)}" r="2.5"
-    fill="var(--muted)" opacity=".55"/>`).join("");
+    fill="var(--muted)" opacity=".5"/>`).join("");
   return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"
-    role="img" aria-label="Weight trend">${dots}
+    role="img" aria-label="体重趋势">${dots}
     <path d="${line}" fill="none" stroke="var(--burn)" stroke-width="2.5"
       stroke-linejoin="round" stroke-linecap="round"/></svg>`;
 }
 
+/* ---------- 校准 ---------- */
 function tuneView(){
-  const c = calibrate();
+  const c=calibrate();
   if(!c.ok){
-    const msg = {
-      need2:`Calibration needs at least two weigh-ins. You have ${c.have||0}.`,
-      short:`Your weigh-ins span ${c.span} days. Calibration waits for ${MIN_SPAN_DAYS},
-             because shorter windows are mostly water weight.`,
-      sparse:`You've logged intake on ${c.logged} of ${c.span} days. Calibration needs
-              about 60% coverage to mean anything.`
+    const msg={
+      need2:`校准至少需要两条体重记录,现在有 ${c.have||0} 条。`,
+      short:`两条记录相隔 ${c.span} 天。校准要等到 ${MIN_SPAN} 天以上 —— 更短的区间里,变化几乎都是水分。`,
+      sparse:`区间内 ${c.span} 天里只记录了 ${c.logged} 天的摄入。覆盖率要到 60% 以上,结果才有意义。`
     }[c.reason];
-    return `<div class="callout"><h4>Not enough data yet</h4><p>${msg}</p></div>
-      <div class="empty">Once it has enough, this screen compares what you actually ate
-      against what your weight actually did, and works backwards to your real daily burn.
-      That observed number beats every formula.</div>`;
+    return `<div class="callout"><h4>数据还不够</h4><p>${msg}</p></div>
+      <div class="empty">攒够之后,这一页会把你实际吃了多少和体重实际怎么变的放在一起,
+      反推出你真实的每日消耗。这个观测出来的数字,比任何公式都可靠。</div>`;
   }
-
-  const formulaOff = c.gap;
-  let html = `<div class="card" style="margin-bottom:10px">
-    <div class="eyebrow">Your real daily burn</div>
+  const g=c.gap;
+  let html=`<div class="card" style="margin-bottom:10px">
+    <div class="eyebrow">真实每日消耗</div>
     <div class="big num" style="color:var(--burn);margin-bottom:10px">${c.realTDEE.toLocaleString()}</div>
-    <div class="stat"><span class="l">Average eaten</span><span class="v num">${c.avgIn.toLocaleString()}</span></div>
-    <div class="stat"><span class="l">Weight change</span>
-      <span class="v num">${c.deltaKg>=0?"+":"\u2212"}${f1(Math.abs(c.deltaKg))} kg</span></div>
-    <div class="stat"><span class="l">Over</span><span class="v num">${c.span} days</span></div>
-    <div class="stat"><span class="l">Rate</span>
-      <span class="v num">${c.perWeek>=0?"+":"\u2212"}${f1(Math.abs(c.perWeek))} kg/week</span></div>
-  </div>`;
+    <div class="stat"><span class="l">平均摄入</span><span class="v num">${c.avgIn.toLocaleString()}</span></div>
+    <div class="stat"><span class="l">体重变化</span>
+      <span class="v num">${c.deltaKg>=0?"+":"−"}${f1(Math.abs(c.deltaKg))} kg</span></div>
+    <div class="stat"><span class="l">观测区间</span><span class="v num">${c.span} 天</span></div>
+    <div class="stat"><span class="l">变化速度</span>
+      <span class="v num">${c.perWeek>=0?"+":"−"}${f1(Math.abs(c.perWeek))} kg/周</span></div></div>`;
 
-  html += `<div class="callout"><h4>Formula vs reality</h4>
-    <p>The app's calculated burn averaged <b>${c.avgOut.toLocaleString()}</b>.
-    Your body says <b>${c.realTDEE.toLocaleString()}</b> \u2014
-    ${formulaOff===0 ? "an exact match, which is rare." :
-      `the formula is <b>${Math.abs(formulaOff).toLocaleString()} ${formulaOff>0?"under":"over"}</b>.
-       ${formulaOff>0 ? "Expected, since BMR plus watch calories misses the energy spent digesting food."
-                      : "Watches commonly overestimate active calories, which would explain it."}`}
+  html += `<div class="callout"><h4>公式 vs 实测</h4><p>
+    应用算出来的平均消耗是 <b>${c.avgOut.toLocaleString()}</b>,
+    你身体给出的是 <b>${c.realTDEE.toLocaleString()}</b> —— 
+    ${g===0 ? "完全吻合,这种情况很少见。" :
+      `公式${g>0?"偏低":"偏高"}了 <b>${Math.abs(g).toLocaleString()}</b>。
+       ${g>0 ? "这是预期之中的:基础代谢加手表活动量,漏掉了消化食物本身要花的能量(约占摄入的 10%)。"
+             : "手表普遍高估活动卡路里,这大概是主要原因。"}`}
     </p></div>`;
 
-  html += `<h2 class="sec">Set a target from this</h2>`;
-  [[0.25,"Slow \u2014 easiest to keep up"],[0.5,"Moderate"]].forEach(([rate,label])=>{
-    const s = suggestTarget(c.realTDEE, rate);
-    html += `<div class="row"><div class="body">
-      <div class="name">${rate} kg / week</div>
-      <div class="sub">${s.clamped ? "Raised to the "+s.floor+" floor" : label}</div></div>
+  html += `<h2 class="sec">按这个数字设目标</h2>`;
+  [[0.25,"慢一些,最容易坚持"],[0.5,"中等速度"]].forEach(([rate,label])=>{
+    const s=suggestTarget(c.realTDEE,rate);
+    html += `<div class="row"><div class="body"><div class="name">每周 ${rate} kg</div>
+      <div class="sub">${s.clamped?("已抬到下限 "+s.floor):label}</div></div>
       <span class="kcal num" style="color:var(--burn)">${s.value.toLocaleString()}</span>
-      <button class="chipbtn" onclick="applyTarget(${s.value})">Use</button></div>`;
+      <button class="x" style="font-size:13px;font-weight:600;color:var(--burn);padding:6px 8px"
+        onclick="applyTarget(${s.value})">采用</button></div>`;
   });
-  html += `<div class="note">Recalculate every few weeks. As you lose weight your burn drops,
-    so a target that worked in month one will stall in month three.
-    ${c.coverage<0.85 ? "Your logging covered "+Math.round(c.coverage*100)+"% of days \u2014 the more complete it is, the sharper this number." : ""}</div>`;
+  html += `<div class="note">每隔几周重算一次。体重下降后消耗本身会跟着降,
+    第一个月管用的目标,到第三个月就会卡住。
+    ${c.coverage<0.85?`当前记录覆盖率 ${Math.round(c.coverage*100)}%,记得越全,这个数字越准。`:""}</div>`;
   return html;
 }
 
+/* ---------- 记录 ---------- */
 function histView(){
-  const keys = Object.keys(history).sort().reverse().slice(0,60);
-  if(!keys.length) return `<div class="empty">Nothing recorded yet.</div>`;
-  const recent = keys.slice(0,7);
-  const avgNet = Math.round(recent.reduce((s,k)=>s+(history[k].in-history[k].out),0)/recent.length);
-  const avgIn  = Math.round(recent.reduce((s,k)=>s+history[k].in,0)/recent.length);
-  let html = `<div class="card" style="margin-bottom:10px">
-    <div class="eyebrow">7-day average balance</div>
+  const keys=Object.keys(history).sort().reverse().slice(0,60);
+  if(!keys.length) return `<div class="empty">还没有任何记录。</div>`;
+  const recent=keys.slice(0,7);
+  const avgNet=Math.round(recent.reduce((s,k)=>s+(history[k].in-history[k].out),0)/recent.length);
+  const avgIn=Math.round(recent.reduce((s,k)=>s+history[k].in,0)/recent.length);
+  let html=`<div class="card" style="margin-bottom:10px">
+    <div class="eyebrow">最近 7 天平均结余</div>
     <div class="big num" style="color:${avgNet>=0?"var(--intake)":"var(--burn)"}">
-      ${avgNet>=0?"+":"\u2212"}${Math.abs(avgNet).toLocaleString()}</div>
-    <div class="note">Averaging ${avgIn.toLocaleString()} eaten per day.
-      Single days swing wildly; the week is the honest unit.</div></div>`;
+      ${avgNet>=0?"+":"−"}${Math.abs(avgNet).toLocaleString()}</div>
+    <div class="note">平均每天摄入 ${avgIn.toLocaleString()}。
+      单日波动很大,以周为单位看才靠谱。</div></div>`;
   keys.forEach(k=>{ const h=history[k], net=h.in-h.out;
-    html += row(shortDate(k), h.in.toLocaleString()+" in \u00b7 "+h.out.toLocaleString()+" out",
-      (net>=0?"+":"\u2212")+Math.abs(net).toLocaleString(), net>=0?"var(--intake)":"var(--burn)"); });
+    html += row(cnFull(k),`摄入 ${h.in.toLocaleString()} · 消耗 ${h.out.toLocaleString()}`,
+      (net>=0?"+":"−")+Math.abs(net).toLocaleString(),
+      net>=0?"var(--intake)":"var(--burn)",null,`openDay('${k}')`); });
   return html;
 }
+function openDay(k){ curDate=k; day=loadDay(k); tabTo("today"); }
 
+/* ---------- 设置 ---------- */
 function setView(){
-  const p = profile||{};
-  let html = `<h2 class="sec">Body stats</h2>`;
-  html += row("Resting burn",
-    `${p.sex==="female"?"Female":"Male"}, ${p.age}, ${p.heightCm}cm, ${p.weightKg}kg`,
+  const p=profile||{};
+  let html=`<h2 class="sec">身体数据</h2>`;
+  html += row("基础代谢",
+    `${p.sex==="female"?"女":"男"} · ${p.age}岁 · ${p.heightCm}cm · ${p.weightKg}kg`,
     bmr().toLocaleString(),"var(--burn)");
-  html += `<button class="btn ghost" style="margin-top:6px" onclick="openSetup()">Edit my stats</button>`;
+  html += `<button class="btn ghost" style="margin-top:6px" onclick="openSetup()">修改身体数据</button>`;
 
-  html += `<h2 class="sec">Options</h2>
-  <div class="switch"><div><div class="t">Track protein</div>
-    <div class="d">One optional field per food</div></div>
-    <button class="toggle ${p.showProtein?"on":""}" onclick="toggleProtein()" aria-label="Track protein"><i></i></button></div>
-  <label class="f" style="margin-top:8px"><span>Daily calorie target (blank for none)</span>
-    <input class="in num" type="number" inputmode="numeric" placeholder="none"
-      value="${p.target||""}" onchange="setTarget(this.value)"></label>
-  <div class="note" style="margin-top:-4px">Calibrate can set this for you from your own data.</div>`;
+  html += `<h2 class="sec">选项</h2>
+  <div class="switch"><div><div class="t">记录蛋白质</div>
+    <div class="d">每样食物多一个可选字段</div></div>
+    <button class="toggle ${p.showProtein?"on":""}" onclick="toggleProtein()" aria-label="记录蛋白质"><i></i></button></div>
+  <div class="row" style="margin-top:8px"><div class="body"><div class="name">每日热量目标</div>
+    <div class="sub">${p.target?"当前 "+p.target.toLocaleString():"未设置 —— 校准页可以帮你算"}</div></div>
+    <button class="x" style="font-size:13px;font-weight:600;color:var(--burn);padding:6px 8px"
+      onclick="editTarget()">修改</button></div>`;
 
-  html += `<h2 class="sec">My saved foods (${mine.length})</h2>`;
-  if(!mine.length) html += `<div class="empty">Foods you type in get saved here for one-tap reuse.</div>`;
-  else mine.forEach(f=>html += row(f.name, f.protein?f.protein+"g protein":null,
-    f.kcal.toLocaleString(),"var(--intake)",`delMine('${f.id}')`));
+  html += `<h2 class="sec">我的食物 <span style="font-weight:400">${mine.length} 条</span></h2>`;
+  if(!mine.length) html += `<div class="empty">自己录入过的食物会存在这里,下次一键复用。</div>`;
+  else mine.slice(0,40).forEach(f=>html += row(f.name, f.protein?f.protein+"g 蛋白质":null,
+    f.kcal.toLocaleString(),"var(--intake)",`delMine('${f.id}')`,`editMine('${f.id}')`));
 
-  html += `<h2 class="sec">Backup</h2>
-  <div class="note" style="margin:0 0 10px">Everything is stored on this phone only.
-    Export a copy now and then \u2014 and if you're moving over from the web version,
-    export there and restore here.</div>
-  <button class="btn ghost" style="margin-bottom:8px" onclick="exportData()">Export my data</button>
-  <button class="btn ghost" onclick="importData()">Restore from a backup</button>`;
+  html += `<h2 class="sec">备份</h2>
+  <div class="note" style="margin:0 0 10px">所有数据只存在这台手机上,不会上传到任何地方。
+    正因如此,卸载应用或清除数据就等于全部丢失 —— 定期导出一份留着。
+    正常的版本更新不会影响数据。</div>
+  <button class="btn ghost" style="margin-bottom:8px" onclick="exportData()">导出数据</button>
+  <button class="btn ghost" onclick="importData()">从备份恢复</button>
+  <div class="note">恢复时可以选择「覆盖」或「合并」。合并会保留两边的记录,冲突时以备份为准。</div>`;
   return html;
 }
 
-/* ---------- actions ---------- */
-function setActive(v){ day.watchActive=n(v); persist(); }
+/* =====================================================================
+   操作
+   ===================================================================== */
+function editActive(){
+  form("手表活动卡路里",[{k:"v",label:"活动/Move 数值(不含基础代谢)",type:"number",
+    value:day.watchActive||"",ph:"0"}],o=>{ day.watchActive=n(o.v); persist(); });
+}
+function addBurn(){
+  form("添加运动",[{k:"label",label:"做了什么",value:"",ph:"游泳"},
+    {k:"kcal",label:"消耗热量",type:"number",value:"",ph:"250"}],o=>{
+    if(!o.label.trim()||!n(o.kcal)){ formError("名称和热量都要填。"); return false; }
+    day.burn.push({id:uid(),label:o.label.trim(),kcal:n(o.kcal)}); persist();
+  });
+}
+function editBurn(id){
+  const b=day.burn.find(x=>x.id===id); if(!b) return;
+  form("修改运动",[{k:"label",label:"做了什么",value:b.label},
+    {k:"kcal",label:"消耗热量",type:"number",value:b.kcal}],o=>{
+    if(!o.label.trim()||!n(o.kcal)){ formError("名称和热量都要填。"); return false; }
+    b.label=o.label.trim(); b.kcal=n(o.kcal); persist();
+  });
+}
 function delFood(id){ day.food=day.food.filter(f=>f.id!==id); persist(); }
 function delBurn(id){ day.burn=day.burn.filter(b=>b.id!==id); persist(); }
-function delMine(id){ mine=mine.filter(f=>f.id!==id); save(K.mine,mine); render(); }
-function setTarget(v){ profile.target=n(v)||0; save(K.profile,profile); render(); }
-function applyTarget(v){ profile.target=v; save(K.profile,profile); view="today"; render(); window.scrollTo(0,0); }
-function toggleProtein(){ profile.showProtein=!profile.showProtein; save(K.profile,profile); render(); }
-function delWeight(date){ weights=weights.filter(w=>w.date!==date); save(K.weights,weights); render(); }
-
-function openBurn(){
-  const label = prompt("What did you do?"); if(!label) return;
-  const kc = prompt("How many calories did it burn?"); if(kc===null) return;
-  day.burn.push({id:uid(),label:label.trim(),kcal:n(kc)}); persist();
+function editFood(id){
+  const f=day.food.find(x=>x.id===id); if(!f) return;
+  const fields=[{k:"name",label:"名称",value:f.name},
+    {k:"kcal",label:"热量",type:"number",value:f.kcal}];
+  if(profile&&profile.showProtein) fields.push({k:"p",label:"蛋白质(g)",type:"number",value:f.protein||0});
+  form("修改这一条",fields,o=>{
+    if(!o.name.trim()||!n(o.kcal)){ formError("名称和热量都要填。"); return false; }
+    f.name=o.name.trim(); f.kcal=n(o.kcal); if("p" in o) f.protein=n(o.p); persist();
+  });
 }
-function openWeigh(){
-  const v = prompt("Weight in kg", weights.length ? f1(weights[weights.length-1].kg) : "");
-  if(v===null) return;
-  const kg = Math.round(Number(v)*10)/10;
-  if(!kg || kg<20 || kg>400){ alert("That doesn't look like a weight in kg."); return; }
-  const d = todayKey();
-  weights = weights.filter(w=>w.date!==d).concat([{date:d,kg}]).sort((a,b)=>a.date<b.date?-1:1);
+function editMine(id){
+  const f=mine.find(x=>x.id===id); if(!f) return;
+  const fields=[{k:"name",label:"名称",value:f.name},{k:"kcal",label:"热量",type:"number",value:f.kcal}];
+  if(profile&&profile.showProtein) fields.push({k:"p",label:"蛋白质(g)",type:"number",value:f.protein||0});
+  form("修改常用食物",fields,o=>{
+    if(!o.name.trim()||!n(o.kcal)){ formError("名称和热量都要填。"); return false; }
+    f.name=o.name.trim(); f.kcal=n(o.kcal); if("p" in o) f.protein=n(o.p);
+    save(K.mine,mine); render();
+  });
+}
+function delMine(id){ mine=mine.filter(f=>f.id!==id); save(K.mine,mine); render(); }
+function editTarget(){
+  form("每日热量目标",[{k:"v",label:"留空表示不设目标",type:"number",
+    value:(profile&&profile.target)||"",ph:"1500"}],o=>{
+    profile.target=n(o.v)||0; save(K.profile,profile); render();
+  });
+}
+function applyTarget(v){ profile.target=v; save(K.profile,profile); toast("目标已设为 "+v); tabTo("today"); }
+function toggleProtein(){ profile.showProtein=!profile.showProtein; save(K.profile,profile); render(); }
+
+/* 体重:可以选日期,方便补录以前的数据 */
+function addWeight(){
+  const lastKg = weights.length ? weights[weights.length-1].kg : "";
+  form("记录体重",[
+    {k:"date",label:"日期",type:"date",value:todayKey()},
+    {k:"kg",label:"体重(kg)",type:"number",step:"0.1",value:lastKg,ph:"65.0"}
+  ],o=>saveWeight(o),"保存");
+}
+function editWeight(date){
+  const w=weights.find(x=>x.date===date); if(!w) return;
+  form("修改这条记录",[
+    {k:"date",label:"日期",type:"date",value:w.date},
+    {k:"kg",label:"体重(kg)",type:"number",step:"0.1",value:w.kg}
+  ],o=>saveWeight(o,date),"保存");
+}
+/* replaceDate:改记录时要顶掉的旧日期。先校验,校验不过绝不改动数据。 */
+function saveWeight(o,replaceDate){
+  const kg = Math.round(Number(o.kg)*10)/10;
+  if(!kg || kg<20 || kg>400){ formError("请输入 20 到 400 之间的体重(kg)。"); return false; }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(o.date)){ formError("请选择日期。"); return false; }
+  if(daysBetween(o.date,todayKey())<0){ formError("不能记录未来的日期。"); return false; }
+  weights = weights.filter(w=>w.date!==o.date && w.date!==replaceDate)
+    .concat([{date:o.date,kg}]).sort((a,b)=>a.date<b.date?-1:1);
   save(K.weights,weights);
-  if(profile){ profile.weightKg = Math.round(kg); save(K.profile,profile); }
+  // 只有最新那条才回写身体数据里的体重(它决定基础代谢)
+  if(profile && weights[weights.length-1].date===o.date){
+    profile.weightKg = Math.round(kg); save(K.profile,profile);
+  }
   render();
 }
+function delWeight(date){
+  ask("要删除 "+cnFull(date)+" 的体重记录吗?","删除记录",()=>{
+    weights=weights.filter(w=>w.date!==date); save(K.weights,weights); render();
+  },true);
+}
 
-/* ---------- backup: uses the Android bridge when installed ---------- */
+/* ---------- 备份 ---------- */
 const NATIVE = () => (typeof Android!=="undefined" && Android && Android.saveBackup);
 function exportData(){
-  const dump = { v:2, exported:new Date().toISOString(), profile, mine, history, weights, days:{} };
+  const dump={v:3,exported:new Date().toISOString(),profile,mine,history,weights,days:{}};
   Object.keys(history).forEach(k=>{ const d=load(K.day(k),null); if(d) dump.days[k]=d; });
-  const text = JSON.stringify(dump,null,2);
-  const name = "ledger-backup-"+todayKey()+".json";
-  if(NATIVE()){ Android.saveBackup(name, text); return; }
+  const text=JSON.stringify(dump,null,2), name="ledger-"+todayKey()+".json";
+  if(NATIVE()){ Android.saveBackup(name,text); return; }
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([text],{type:"application/json"}));
   a.download=name; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
+let pendingRestore=null;
 function applyBackup(txt){
   try{
     const d=JSON.parse(txt);
-    if(!d.profile) throw new Error("bad");
-    if(!confirm("This replaces everything currently in the app. Continue?")) return;
-    profile=d.profile; mine=d.mine||[]; history=d.history||{}; weights=d.weights||[];
-    save(K.profile,profile); save(K.mine,mine); save(K.hist,history); save(K.weights,weights);
-    Object.keys(d.days||{}).forEach(k=>save(K.day(k),d.days[k]));
-    day = load(K.day(todayKey()),null) || {date:todayKey(),food:[],watchActive:0,burn:[]};
-    view="today"; render(); alert("Restored.");
-  }catch(e){ alert("That file isn't a Ledger backup."); }
+    if(!d.profile && !d.history) throw new Error("bad");
+    pendingRestore=d;
+    const nDays=Object.keys(d.days||{}).length, nW=(d.weights||[]).length;
+    showDlg(`<h3>恢复备份</h3><div class="msg">备份里有 ${nDays} 天的记录、${nW} 条体重。<br><br>
+      <b>覆盖</b>:清空当前数据,完全用备份替换。<br>
+      <b>合并</b>:保留现有记录,补进备份里有而本机没有的部分,重复的以备份为准。</div>
+      <div class="acts"><button class="btn ghost" onclick="dismissDlg()">取消</button>
+      <button class="btn teal" onclick="doRestore('merge')">合并</button>
+      <button class="btn danger" onclick="doRestore('replace')">覆盖</button></div>`);
+  }catch(e){ say("这个文件不是本应用的备份。","无法读取"); }
 }
-window.applyBackup = applyBackup;   // Android calls this after picking a file
+window.applyBackup = applyBackup;
+function doRestore(mode){
+  const d=pendingRestore; pendingRestore=null; dismissDlg();
+  if(!d) return;
+  setTimeout(()=>{
+    if(mode==="replace"){
+      Object.keys(history).forEach(k=>{ try{localStorage.removeItem(K.day(k));}catch(e){} });
+      profile=d.profile||profile; mine=d.mine||[]; history=d.history||{}; weights=d.weights||[];
+    } else {
+      if(!profile) profile=d.profile;
+      (d.mine||[]).forEach(f=>{
+        if(!mine.some(x=>x.name.trim().toLowerCase()===f.name.trim().toLowerCase())) mine.push(f); });
+      history=Object.assign({},history,d.history||{});
+      const wm={}; weights.forEach(w=>wm[w.date]=w); (d.weights||[]).forEach(w=>wm[w.date]=w);
+      weights=Object.keys(wm).sort().map(k=>wm[k]);
+    }
+    Object.keys(d.days||{}).forEach(k=>save(K.day(k),d.days[k]));
+    save(K.profile,profile); save(K.mine,mine); save(K.hist,history); save(K.weights,weights);
+    curDate=todayKey(); day=loadDay(curDate); view="today"; render();
+    toast(mode==="replace"?"已覆盖恢复":"已合并恢复");
+  },60);
+}
 function importData(){
   if(NATIVE() && Android.pickBackup){ Android.pickBackup(); return; }
   const inp=document.createElement("input");
@@ -631,76 +876,75 @@ function importData(){
 }
 
 /* =====================================================================
-   ADD-FOOD SHEET
+   添加餐食
    ===================================================================== */
 let addTab="search", picked=null, mult=1, listRows=[];
-function openAdd(){ addTab="search"; picked=null; mult=1; drawAdd(); }
-function closeSheet(){ document.getElementById("sheet").innerHTML=""; }
+function openAdd(){ addTab="search"; picked=null; mult=1; drawAdd(); pushNav(()=>closeSheet(true)); }
+function closeSheet(silent){ document.getElementById("sheet").innerHTML=""; picked=null; }
+function dismissSheet(){ goBack() || closeSheet(true); }
 function setTab(t){ addTab=t; picked=null; drawAdd(); }
 function setMult(m){ mult=m; drawAdd(); }
 function pickIdx(i){ picked=listRows[i]; mult=1; drawAdd(); }
 
 function drawAdd(){
-  const showP = profile&&profile.showProtein;
+  const showP=profile&&profile.showProtein;
   let inner="";
   if(picked){
     const kc=Math.round(picked.kcal*mult), pr=Math.round((picked.protein||0)*mult);
-    inner = `<div class="card" style="margin-bottom:14px">
+    inner=`<div class="card" style="margin-bottom:14px">
       <div style="font-size:15px;font-weight:600;margin-bottom:12px">${esc(picked.name)}</div>
       <div class="mult">${[0.5,1,1.5,2].map(m=>
-        `<button class="${mult===m?"on":""}" onclick="setMult(${m})">${m}\u00d7</button>`).join("")}</div>
-      <div class="stat"><span class="l">Calories</span>
+        `<button class="${mult===m?"on":""}" onclick="setMult(${m})">${m} 份</button>`).join("")}</div>
+      <div class="stat"><span class="l">热量</span>
         <span class="num" style="font-size:26px;font-weight:600;color:var(--intake)">${kc.toLocaleString()}</span></div>
-      ${showP?`<div class="stat"><span class="l">Protein</span>
-        <span class="v num">${pr}g</span></div>`:""}</div>
-    <button class="btn gold" onclick="commitPicked()">Add to today</button>
-    <button class="btn ghost" style="margin-top:8px" onclick="picked=null;drawAdd()">Back</button>`;
+      ${showP?`<div class="stat"><span class="l">蛋白质</span><span class="v num">${pr}g</span></div>`:""}</div>
+      <button class="btn gold" onclick="commitPicked()">加入${curDate===todayKey()?"今天":cnDate(curDate)}</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="picked=null;drawAdd()">返回</button>`;
   }
   else if(addTab==="search"){
-    inner = `<input class="in" id="q" placeholder="Search foods\u2026" oninput="drawList(this.value)" autocomplete="off">
+    inner=`<input class="in" id="q" placeholder="搜索食物…" oninput="drawList(this.value)" autocomplete="off">
       <div class="list" id="list"></div>`;
   }
   else if(addTab==="quick"){
-    inner = `<label class="f"><span>What was it?</span>
-        <input class="in" id="qn" placeholder="Canteen lunch"></label>
-      <div class="two"><label class="f"><span>Calories</span>
+    inner=`<label class="f"><span>吃了什么</span>
+        <input class="in" id="qn" placeholder="食堂午餐"></label>
+      <div class="two"><label class="f"><span>热量</span>
         <input class="in num" id="qk" type="number" inputmode="numeric" placeholder="0"></label>
-        ${showP?`<label class="f"><span>Protein (g)</span>
+        ${showP?`<label class="f"><span>蛋白质(g)</span>
         <input class="in num" id="qp" type="number" inputmode="numeric" placeholder="0"></label>`:""}</div>
       <div class="check"><input type="checkbox" id="qs" checked>
-        <label for="qs">Save to my foods for next time</label></div>
+        <label for="qs">存进「我的食物」,下次一键复用</label></div>
       <div class="err hide" id="qerr"></div>
-      <button class="btn gold" onclick="commitQuick()">Add to today</button>
-      <div class="note">Photograph the meal, ask any AI chat to estimate it, type the number here.</div>
-      <button class="btn ghost" style="margin-top:8px" onclick="copyPrompt()">Copy prompt for the AI</button>`;
+      <button class="btn gold" onclick="commitQuick()">加入记录</button>
+      <div class="note">拍下餐食,发给任意 AI 对话问热量,再把数字填到这里。</div>
+      <button class="btn ghost" style="margin-top:8px" onclick="copyPrompt()">复制提问用的提示词</button>`;
   }
   else {
-    inner = `<label class="f"><span>Product name</span>
-        <input class="in" id="ln" placeholder="Greek yogurt, strawberry"></label>
-      <div class="two"><label class="f"><span>Calories per serving</span>
+    inner=`<label class="f"><span>产品名称</span>
+        <input class="in" id="ln" placeholder="希腊酸奶 草莓味"></label>
+      <div class="two"><label class="f"><span>每份热量</span>
         <input class="in num" id="lk" type="number" inputmode="numeric" placeholder="0" oninput="labelPreview()"></label>
-        ${showP?`<label class="f"><span>Protein per serving (g)</span>
+        ${showP?`<label class="f"><span>每份蛋白质(g)</span>
         <input class="in num" id="lp" type="number" inputmode="numeric" placeholder="0"></label>`:""}</div>
-      <label class="f"><span>How many servings did you eat?</span>
+      <label class="f"><span>吃了几份</span>
         <input class="in num" id="ls" type="number" inputmode="decimal" step="0.25" value="1" oninput="labelPreview()"></label>
       <div class="card" style="margin-bottom:12px;padding:14px">
-        <div class="stat"><span class="l">That comes to</span>
+        <div class="stat"><span class="l">合计</span>
         <span class="num" id="lprev" style="font-size:26px;font-weight:600;color:var(--intake)">0</span></div></div>
       <div class="check"><input type="checkbox" id="lsv" checked>
-        <label for="lsv">Save to my foods for next time</label></div>
+        <label for="lsv">存进「我的食物」</label></div>
       <div class="err hide" id="lerr"></div>
-      <button class="btn gold" onclick="commitLabel()">Add to today</button>
-      <div class="note">Watch the serving size \u2014 a bag that looks like one portion
-        is often listed as two or three.</div>`;
+      <button class="btn gold" onclick="commitLabel()">加入记录</button>
+      <div class="note">注意包装上的份量 —— 看着像一份的一袋,标签上常常写的是两三份。</div>`;
   }
-  document.getElementById("sheet").innerHTML = `
-    <div class="sheet-bg" onclick="if(event.target===this)closeSheet()">
-      <div class="sheet"><div class="sheet-head"><h3>Add a meal</h3>
-        <button class="x" style="font-size:26px" onclick="closeSheet()">\u00d7</button></div>
+  document.getElementById("sheet").innerHTML=`
+    <div class="sheet-bg" onclick="if(event.target===this)dismissSheet()">
+      <div class="sheet"><div class="sheet-head"><h3>添加餐食</h3>
+        <button class="x" style="font-size:26px" onclick="dismissSheet()">×</button></div>
         ${picked?"":`<div class="tabs">
-          <button class="tab ${addTab==="search"?"on":""}" onclick="setTab('search')">Search</button>
-          <button class="tab ${addTab==="quick"?"on":""}" onclick="setTab('quick')">Quick add</button>
-          <button class="tab ${addTab==="label"?"on":""}" onclick="setTab('label')">Label</button></div>`}
+          <button class="tab ${addTab==="search"?"on":""}" onclick="setTab('search')">搜索</button>
+          <button class="tab ${addTab==="quick"?"on":""}" onclick="setTab('quick')">快速录入</button>
+          <button class="tab ${addTab==="label"?"on":""}" onclick="setTab('label')">营养标签</button></div>`}
         ${inner}</div></div>`;
   if(!picked && addTab==="search") drawList("");
 }
@@ -708,38 +952,44 @@ function drawList(q){
   q=(q||"").trim().toLowerCase();
   const el=document.getElementById("list"); if(!el) return;
   listRows=[]; let html="";
-  const mn = mine.filter(f=>!q||f.name.toLowerCase().includes(q));
-  if(mn.length){ html+=`<div class="grouphead">My foods</div>`;
+  if(!q){
+    const recent = mine.slice().sort((a,b)=>(b.used||0)-(a.used||0)).slice(0,5);
+    if(recent.length){ html+=`<div class="grouphead">最近常吃</div>`;
+      recent.forEach(f=>html+=pickBtn({name:f.name,kcal:f.kcal,protein:f.protein},true)); }
+  }
+  const mn = mine.filter(f=>q && f.name.toLowerCase().includes(q));
+  if(mn.length){ html+=`<div class="grouphead">我的食物</div>`;
     mn.forEach(f=>html+=pickBtn({name:f.name,kcal:f.kcal,protein:f.protein},true)); }
   const groups={};
   FOODS.forEach(([g,name,kc,p])=>{
-    if(q && !name.toLowerCase().includes(q) && !g.toLowerCase().includes(q)) return;
+    if(q && !name.toLowerCase().includes(q) && !g.includes(q)) return;
     (groups[g]=groups[g]||[]).push({name,kcal:kc,protein:p}); });
   Object.keys(groups).forEach(g=>{ html+=`<div class="grouphead">${g}</div>`;
     groups[g].forEach(f=>html+=pickBtn(f,false)); });
-  if(!html) html=`<div class="empty">No match. Use "Quick add" to enter it \u2014 it'll be saved.</div>`;
+  if(!html) html=`<div class="empty">没找到。用「快速录入」自己填一条,填完会存起来。</div>`;
   el.innerHTML=html;
 }
 function pickBtn(f,isMine){
   const i=listRows.push(f)-1, showP=profile&&profile.showProtein;
   return `<button class="pick" onclick="pickIdx(${i})"><div class="body">
     <div class="name">${esc(f.name)}</div>
-    ${isMine?`<div class="sub"><span class="tag">Saved</span></div>`
-      :showP&&f.protein?`<div class="sub">${f.protein}g protein</div>`:""}</div>
+    ${isMine?`<div class="sub"><span class="tag">已保存</span></div>`
+      :showP&&f.protein?`<div class="sub">${f.protein}g 蛋白质</div>`:""}</div>
     <span class="kcal num" style="color:var(--intake)">${f.kcal}</span></button>`;
 }
 function commit(name,kcal,prot){
   day.food.push({id:uid(),name,kcal:n(kcal),protein:n(prot),ts:Date.now()});
-  closeSheet(); persist();
+  touchFood(name);
+  dismissSheet(); persist();
 }
 function commitPicked(){ if(picked)
-  commit(picked.name, Math.round(picked.kcal*mult), Math.round((picked.protein||0)*mult)); }
+  commit(picked.name,Math.round(picked.kcal*mult),Math.round((picked.protein||0)*mult)); }
 function commitQuick(){
   const name=(document.getElementById("qn").value||"").trim();
   const kc=n(document.getElementById("qk").value);
   const pEl=document.getElementById("qp"), pr=pEl?n(pEl.value):0;
   const err=document.getElementById("qerr");
-  if(!name||!kc){ err.textContent="Give it a name and a calorie number."; err.classList.remove("hide"); return; }
+  if(!name||!kc){ err.textContent="名称和热量都要填。"; err.classList.remove("hide"); return; }
   if(document.getElementById("qs").checked) rememberFood(name,kc,pr);
   commit(name,kc,pr);
 }
@@ -754,24 +1004,25 @@ function commitLabel(){
   const sv=Number(document.getElementById("ls").value)||0;
   const pEl=document.getElementById("lp"), pr=pEl?n(pEl.value):0;
   const err=document.getElementById("lerr");
-  if(!name||!kc||!sv){ err.textContent="Fill in the name, calories per serving, and servings."; err.classList.remove("hide"); return; }
-  if(document.getElementById("lsv").checked) rememberFood(name+" (1 serving)",kc,pr);
+  if(!name||!kc||!sv){ err.textContent="名称、每份热量、份数都要填。"; err.classList.remove("hide"); return; }
+  if(document.getElementById("lsv").checked) rememberFood(name+"(1份)",kc,pr);
   commit(name,Math.round(kc*sv),Math.round(pr*sv));
 }
 function copyPrompt(){
-  const t="Look at this photo of my meal. Estimate the portion sizes and tell me the total calories"
-    +((profile&&profile.showProtein)?" and total protein in grams":"")
-    +". Reply with a short list of items with their numbers, then the total. Say what portion size you assumed.";
+  const t="看这张我这一餐的照片,估算每样食物的份量,告诉我总热量"
+    +((profile&&profile.showProtein)?"和总蛋白质克数":"")
+    +"。请先列出每样食物和它的数值,再给出合计,并说明你假设的份量。";
   if(navigator.clipboard) navigator.clipboard.writeText(t)
-    .then(()=>alert("Prompt copied."),()=>prompt("Copy this:",t));
-  else prompt("Copy this:",t);
+    .then(()=>toast("提示词已复制"),()=>say(t,"手动复制"));
+  else say(t,"手动复制");
 }
 
 /* =====================================================================
-   SETUP
+   身体数据设置
    ===================================================================== */
 let sf={};
-function openSetup(){ sf = profile?Object.assign({},profile):{sex:"female",units:"metric"}; drawSetup(); }
+function openSetup(){ sf=profile?Object.assign({},profile):{sex:"female",units:"metric"}; drawSetup();
+  if(profile) pushNav(()=>closeSetup(true)); }
 function setSF(k,v){ sf[k]=v; drawSetup(); }
 function readSF(k,v){ sf[k]=v; drawSetupPreview(); }
 function sfBmr(){
@@ -786,59 +1037,73 @@ function drawSetupPreview(){
   const el=document.getElementById("bmrPrev"); if(!el) return;
   const v=sfBmr();
   el.innerHTML = v?`<div class="card" style="margin-bottom:16px">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:3px">Your resting burn</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:3px">你的基础代谢</div>
     <div class="num" style="font-size:26px;font-weight:600;color:var(--burn)">${v.toLocaleString()}
-      <span style="font-size:13px;color:var(--muted)">cal / day</span></div></div>`:"";
+      <span style="font-size:13px;color:var(--muted)">千卡 / 天</span></div></div>`:"";
 }
 function drawSetup(){
-  const metric = sf.units==="metric";
-  document.getElementById("setup").innerHTML = `<div class="setup"><div class="inner">
-    <div class="sheet-head"><h3>Your body stats</h3>
-      ${profile?`<button class="x" style="font-size:26px" onclick="closeSetup()">\u00d7</button>`:""}</div>
-    <p class="note" style="margin:0 0 18px">These give your resting burn \u2014 the energy spent
-      breathing, thinking, and repairing cells before you move at all.</p>
-    <div class="seg"><button class="${metric?"on":""}" onclick="setSF('units','metric')">kg / cm</button>
-      <button class="${!metric?"on":""}" onclick="setSF('units','imperial')">lb / in</button></div>
-    <div class="seg"><button class="${sf.sex==="female"?"on":""}" onclick="setSF('sex','female')">Female</button>
-      <button class="${sf.sex==="male"?"on":""}" onclick="setSF('sex','male')">Male</button></div>
-    <label class="f"><span>Age</span><input class="in num" type="number" inputmode="numeric"
+  const metric=sf.units==="metric";
+  document.getElementById("setup").innerHTML=`<div class="setup"><div class="inner">
+    <div class="sheet-head"><h3>身体数据</h3>
+      ${profile?`<button class="x" style="font-size:26px" onclick="dismissSetup()">×</button>`:""}</div>
+    <p class="note" style="margin:0 0 18px">用来算基础代谢 ——
+      在你完全不动的情况下,呼吸、思考、维持器官运转所消耗的能量。</p>
+    <div class="seg"><button class="${metric?"on":""}" onclick="setSF('units','metric')">公斤 / 厘米</button>
+      <button class="${!metric?"on":""}" onclick="setSF('units','imperial')">磅 / 英寸</button></div>
+    <div class="seg"><button class="${sf.sex==="female"?"on":""}" onclick="setSF('sex','female')">女</button>
+      <button class="${sf.sex==="male"?"on":""}" onclick="setSF('sex','male')">男</button></div>
+    <label class="f"><span>年龄</span><input class="in num" type="number" inputmode="numeric"
       placeholder="30" value="${sf.age||""}" oninput="readSF('age',this.value)"></label>
     ${metric
-      ? `<label class="f"><span>Height (cm)</span><input class="in num" type="number" inputmode="decimal"
+      ? `<label class="f"><span>身高(cm)</span><input class="in num" type="number" inputmode="decimal"
           placeholder="170" value="${sf.heightCm||""}" oninput="readSF('heightCm',this.value)"></label>
-         <label class="f"><span>Weight (kg)</span><input class="in num" type="number" inputmode="decimal"
+         <label class="f"><span>体重(kg)</span><input class="in num" type="number" inputmode="decimal"
           placeholder="65" value="${sf.weightKg||""}" oninput="readSF('weightKg',this.value)"></label>`
-      : `<label class="f"><span>Height (inches)</span><input class="in num" type="number" inputmode="decimal"
+      : `<label class="f"><span>身高(英寸)</span><input class="in num" type="number" inputmode="decimal"
           placeholder="67" value="${sf.heightIn||""}" oninput="readSF('heightIn',this.value)"></label>
-         <label class="f"><span>Weight (lb)</span><input class="in num" type="number" inputmode="decimal"
+         <label class="f"><span>体重(磅)</span><input class="in num" type="number" inputmode="decimal"
           placeholder="145" value="${sf.weightLb||""}" oninput="readSF('weightLb',this.value)"></label>`}
     <div id="bmrPrev"></div>
-    <button class="btn" onclick="saveSetup()">Save stats</button>
-    <p class="note">Mifflin\u2013St Jeor. It's a population average, so treat it as a starting
-      hypothesis \u2014 the Calibrate screen will replace it with your own observed number
-      once you've logged a few weeks.</p>
+    <button class="btn" onclick="saveSetup()">保存</button>
+    <p class="note">用的是 Mifflin-St Jeor 公式。它是人群平均值,只能当作起点 ——
+      记录几周之后,「校准」页会用你自己的实测数据取代它。</p>
   </div></div>`;
   drawSetupPreview();
 }
 function closeSetup(){ document.getElementById("setup").innerHTML=""; }
+function dismissSetup(){ goBack() || closeSetup(); }
 function saveSetup(){
-  if(!sfBmr()){ alert("Fill in your age, height, and weight first."); return; }
-  const metric = sf.units==="metric";
-  profile = { sex:sf.sex, units:sf.units, age:Number(sf.age),
+  if(!sfBmr()){ say("年龄、身高、体重都要填。","还差一点"); return; }
+  const metric=sf.units==="metric";
+  profile={ sex:sf.sex, units:sf.units, age:Number(sf.age),
     heightCm:Math.round(metric?Number(sf.heightCm):Number(sf.heightIn)*2.54),
     weightKg:Math.round(metric?Number(sf.weightKg):Number(sf.weightLb)*0.4536),
     heightIn:sf.heightIn, weightLb:sf.weightLb,
     showProtein: profile?!!profile.showProtein:false,
     target: profile?profile.target||0:0 };
-  save(K.profile,profile); closeSetup(); persist();
+  save(K.profile,profile);
+  if(stack.length) goBack(); else closeSetup();
+  render();
 }
 
-/* ---------- boot ---------- */
-setInterval(()=>{ if(day.date!==todayKey()){
-  day = load(K.day(todayKey()),null)||{date:todayKey(),food:[],watchActive:0,burn:[]}; render(); } },60000);
+/* =====================================================================
+   启动
+   ===================================================================== */
+/* 软键盘弹出时收起底栏,避免遮挡和跟随 */
+if(window.visualViewport){
+  const vv=window.visualViewport;
+  const onVV=()=>{ const up = (window.innerHeight - vv.height) > 150;
+    document.body.classList.toggle("kb",up); };
+  vv.addEventListener("resize",onVV); vv.addEventListener("scroll",onVV);
+}
+/* 跨天自动切换 */
+setInterval(()=>{ if(curDate!==todayKey() && view==="today" && !stack.length){
+  const wasToday = daysBetween(curDate,todayKey())===1;
+  if(wasToday){ curDate=todayKey(); day=loadDay(curDate); render(); } } },60000);
+
 render();
 if(!profile) openSetup();
-if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 }
 </script>
