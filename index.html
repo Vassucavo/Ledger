@@ -71,10 +71,12 @@ label.f span{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
 
 .btn{border:none;border-radius:10px;padding:13px 16px;font-size:15px;font-weight:600;
   width:100%;background:var(--ink);color:#fff}
-.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line);
+  box-shadow:0 1px 3px rgba(24,36,30,.07)}
 .btn.gold{background:var(--intake)}
 .btn.teal{background:var(--burn)}
-.btn.danger{background:transparent;color:var(--warn);border:1px solid var(--warn)}
+.btn.danger{background:var(--paper);color:var(--warn);border:1px solid var(--warn);
+  box-shadow:0 1px 3px rgba(24,36,30,.07)}
 
 /* 底栏:钉死在屏幕底部,键盘弹出时整体隐藏,绝不跟随 */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;
@@ -102,8 +104,9 @@ body.overlay .tabbar,body.overlay .fab{display:none!important}
 .sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .sheet-head h3{font-size:17px;font-weight:600}
 .tabs{display:flex;gap:6px;margin-bottom:16px}
-.tab{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);
-  border-radius:9px;padding:9px 0;font-size:13px;font-weight:600}
+.tab{flex:1;border:1px solid var(--line);background:var(--paper);color:var(--muted);
+  border-radius:9px;padding:10px 0;font-size:13px;font-weight:600;
+  box-shadow:0 1px 3px rgba(24,36,30,.07)}
 .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
 .dlg-bg{position:fixed;inset:0;background:rgba(24,36,30,.5);z-index:70;
@@ -121,10 +124,14 @@ body.overlay .tabbar,body.overlay .fab{display:none!important}
 .pick .nm{font-size:14px}
 .pick .un{font-size:11px;color:var(--muted)}
 .grouphead{font-size:11px;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;font-weight:600}
-.list{max-height:44vh;overflow-y:auto;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.list{margin-bottom:4px}
+.searchwrap{position:sticky;top:-2px;z-index:3;background:var(--canvas);
+  padding:2px 0 10px;margin-bottom:2px}
+body.glass .searchwrap{background:#F3F6F1}
 .quick{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .quick button{flex:1 1 auto;min-width:58px;border:1px solid var(--line);background:var(--paper);
-  color:var(--ink);border-radius:9px;padding:10px 0;font-size:14px}
+  color:var(--ink);border-radius:9px;padding:11px 0;font-size:14px;
+  box-shadow:0 1px 3px rgba(24,36,30,.07)}
 .quick button.on{background:var(--burn);color:#fff;border-color:var(--burn)}
 .two{display:flex;gap:10px}
 .two > *{flex:1}
@@ -136,8 +143,9 @@ body.overlay .tabbar,body.overlay .fab{display:none!important}
 .hide{display:none!important}
 
 .seg{display:flex;gap:8px;margin-bottom:14px}
-.seg button{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);
-  border-radius:10px;padding:11px 0;font-size:14px;font-weight:600}
+.seg button{flex:1;border:1px solid var(--line);background:var(--paper);color:var(--muted);
+  border-radius:10px;padding:11px 0;font-size:14px;font-weight:600;
+  box-shadow:0 1px 3px rgba(24,36,30,.07)}
 .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .switch{display:flex;justify-content:space-between;align-items:center;padding:13px;
   background:var(--paper);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;gap:12px}
@@ -180,6 +188,25 @@ body.glass{
     linear-gradient(180deg,#E9EFE7 0%,#DDE6DB 100%);
   background-attachment:fixed;
 }
+/* 只有这四个顶层固定面用 backdrop-filter。
+   放在滚动容器里的元素一旦用它,安卓 WebView 会留下残影 —— v5 那条
+   "空的透明条"就是这么来的。所以内部元素一律实心。 */
+body.glass .tabbar,
+body.glass .sheet,
+body.glass .dlg,
+body.glass .setup{
+  background:rgba(250,252,248,.72);
+  -webkit-backdrop-filter:blur(24px) saturate(175%);
+  backdrop-filter:blur(24px) saturate(175%);
+  border-color:rgba(255,255,255,.62);
+}
+body.glass .sheet,
+body.glass .dlg,
+body.glass .tabbar{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),
+             0 10px 30px rgba(24,36,30,.10);
+}
+/* 内部元素:实心,但保留高光和阴影,依然有层次 */
 body.glass .card,
 body.glass .row,
 body.glass .pick,
@@ -189,50 +216,38 @@ body.glass .in,
 body.glass .iconb,
 body.glass .datenav button,
 body.glass .quick button,
-body.glass .tabbar,
-body.glass .sheet,
-body.glass .dlg,
-body.glass .setup{
-  background:rgba(250,252,248,.58);
-  -webkit-backdrop-filter:blur(22px) saturate(175%);
-  backdrop-filter:blur(22px) saturate(175%);
-  border-color:rgba(255,255,255,.62);
+body.glass .tab,
+body.glass .seg button,
+body.glass .btn.ghost{
+  background:#FBFCFA;
+  border-color:rgba(255,255,255,.9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 8px rgba(24,36,30,.06);
 }
-body.glass .card,
-body.glass .sheet,
-body.glass .dlg,
-body.glass .tabbar{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),
-             inset 0 -1px 0 rgba(24,36,30,.05),
-             0 10px 30px rgba(24,36,30,.10);
-}
-body.glass .row,
-body.glass .pick,
-body.glass .switch,
-body.glass .callout{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 8px rgba(24,36,30,.05);
-}
+body.glass .card{ box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 6px 18px rgba(24,36,30,.08); }
 body.glass .sheet-bg,
 body.glass .dlg-bg{
-  background:rgba(24,36,30,.28);
+  background:rgba(24,36,30,.30);
   -webkit-backdrop-filter:blur(3px);
   backdrop-filter:blur(3px);
 }
-body.glass .btn{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 4px 14px rgba(24,36,30,.16);
-}
-body.glass .btn.ghost{
-  background:rgba(250,252,248,.5);
-  -webkit-backdrop-filter:blur(18px) saturate(160%);
-  backdrop-filter:blur(18px) saturate(160%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
-}
+body.glass .btn{ box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 4px 14px rgba(24,36,30,.16); }
+
+/* 选中态必须压过上面的玻璃规则 —— v5 就栽在 CSS 优先级上:
+   body.glass .quick button 权重高于 .quick button.on,把青色盖掉了。 */
 body.glass .quick button.on,
 body.glass .seg button.on,
 body.glass .tab.on{
-  -webkit-backdrop-filter:none; backdrop-filter:none;
+  background:var(--burn);
+  color:#fff;
+  border-color:var(--burn);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.25), 0 2px 10px rgba(29,107,103,.35);
 }
-/* 关掉动画偏好或性能不足时,玻璃会退化成不透明,依然可读 */
+body.glass .tab.on,
+body.glass .seg button.on{
+  background:var(--ink);
+  border-color:var(--ink);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 2px 10px rgba(24,36,30,.3);
+}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   body.glass .card, body.glass .row, body.glass .pick, body.glass .switch,
   body.glass .callout, body.glass .in, body.glass .tabbar, body.glass .sheet,
@@ -537,6 +552,14 @@ const eaten   = () => day.food.reduce((s,f)=>s+f.kcal,0);
 const protein = () => day.food.reduce((s,f)=>s+(f.protein||0),0);
 const burned  = () => bmr() + (day.watchActive||0) + day.burn.reduce((s,b)=>s+b.kcal,0);
 const target  = () => (profile && profile.target) ? profile.target : 0;
+const targetMode = () => (profile && profile.targetMode==="net") ? "net" : "intake";
+/* 今天允许摄入多少:
+   intake 模式 —— 就是设定值
+   net    模式 —— 消耗 + 结余目标(结余为负即缺口) */
+function allowance(){
+  const t=target(); if(!t) return 0;
+  return targetMode()==="net" ? Math.max(0, burned()+t) : t;
+}
 
 function persist(){
   const empty = !day.food.length && !day.watchActive && !day.burn.length;
@@ -577,8 +600,15 @@ function closeTop(){
   if(fn) fn();
   return true;
 }
-/* 原生层调用这个。返回 true = 已处理,false = 请退出应用 */
+/* 原生层调用这个。返回 true = 已处理,false = 请退出应用
+   顺序:先收键盘 → 再关浮层 → 再回「今天」→ 最后才退出 */
 window.appBack = function(){
+  const ae = document.activeElement;
+  if(ae && (ae.tagName==="INPUT" || ae.tagName==="TEXTAREA" || ae.isContentEditable)){
+    try{ ae.blur(); }catch(e){}
+    document.body.classList.remove("kb");
+    return true;
+  }
   if(closeTop()) return true;
   if(view!=="today"){ view="today"; render(); window.scrollTo(0,0); return true; }
   return false;
@@ -732,7 +762,7 @@ function row(name,sub,val,color,onDel,onTap){
 /* ---------- 今天 ---------- */
 function todayView(){
   const e=eaten(), b=burned(), net=e-b, span=Math.max(e,b,1);
-  const showP=profile&&profile.showProtein, tg=target();
+  const showP=profile&&profile.showProtein, tg=target(), allow=allowance();
   const isToday=curDate===todayKey();
 
   let html='<div class="datenav">'+
@@ -746,11 +776,16 @@ function todayView(){
 
   html+='<div class="card">';
   if(tg){
-    const left=tg-e;
+    const left=allow-e;
     html+='<div class="eyebrow">'+(left>=0?"今天还能吃":"已超出目标")+'</div>'+
       '<div class="big num" style="color:'+(left>=0?"var(--burn)":"var(--warn)")+';margin-bottom:6px">'+
       Math.abs(left).toLocaleString()+'</div>'+
-      '<div class="note" style="margin:0 0 16px">目标 '+tg.toLocaleString()+',已摄入 '+e.toLocaleString()+'</div>';
+      '<div class="note" style="margin:0 0 16px">'+
+      (targetMode()==="net"
+        ? "目标结余 "+(tg>=0?"+":"−")+Math.abs(tg).toLocaleString()+
+          " · 按今天消耗 "+b.toLocaleString()+" 算,可吃 "+allow.toLocaleString()
+        : "目标 "+allow.toLocaleString())+
+      ",已摄入 "+e.toLocaleString()+'</div>';
   } else {
     html+='<div class="eyebrow">'+(net>=0?"盈余":"缺口")+'</div>'+
       '<div class="big num" style="color:'+(net>=0?"var(--intake)":"var(--burn)")+';margin-bottom:16px">'+
@@ -948,7 +983,11 @@ function setView(){
     '<div class="d">每样食物多一个可选字段</div></div>'+
     '<button class="toggle '+(p.showProtein?"on":"")+'" onclick="toggleProtein()" aria-label="记录蛋白质"><i></i></button></div>'+
     '<div class="row" style="margin-top:8px"><div class="body"><div class="name">每日热量目标</div>'+
-    '<div class="sub">'+(p.target?"当前 "+p.target.toLocaleString():"未设置 —— 校准页可以帮你算")+'</div></div>'+
+    '<div class="sub">'+(p.target
+      ? (targetMode()==="net"
+          ? "每天结余 "+(p.target>=0?"+":"−")+Math.abs(p.target).toLocaleString()
+          : "每天摄入 "+p.target.toLocaleString())
+      : "未设置 —— 校准页可以帮你算")+'</div></div>'+
     '<button class="mini" onclick="editTarget()">修改</button></div>';
   html+='<h2 class="sec">我的食物 <span style="font-weight:400">'+mine.length+' 条</span></h2>';
   if(!mine.length) html+='<div class="empty">自己录入过的食物会存在这里,下次一键复用。</div>';
@@ -1013,13 +1052,58 @@ function editMine(id){
   });
 }
 function delMine(id){ mine=mine.filter(function(f){return f.id!==id;}); save(K.mine,mine); render(); }
-function editTarget(){
-  form("每日热量目标",[{k:"v",label:"留空表示不设目标",type:"number",
-    value:(profile&&profile.target)||"",ph:"1500"}],function(o){
-    profile.target=n(o.v)||0; save(K.profile,profile); render();
-  });
+let tgMode="intake";
+function setTgMode(m){
+  tgMode=m;
+  const a=document.getElementById("tm_i"), b=document.getElementById("tm_n");
+  if(a) a.className = m==="intake" ? "on" : "";
+  if(b) b.className = m==="net" ? "on" : "";
+  const lb=document.getElementById("tg_lb"), hint=document.getElementById("tg_hint");
+  if(lb) lb.textContent = m==="net" ? "每天的结余(负数=缺口,正数=盈余)" : "每天摄入多少千卡";
+  if(hint) hint.textContent = m==="net"
+    ? "按结余设目标时,每天可吃的量会跟着当天消耗浮动 —— 运动多的日子自动多给你一些额度。减重填负数,比如 −500;增重填正数,比如 +300。"
+    : "固定每天吃多少,不随消耗变化。";
 }
-function applyTarget(v){ profile.target=v; save(K.profile,profile); toast("目标已设为 "+v); tabTo("today"); }
+function editTarget(){
+  tgMode = targetMode();
+  const cur = (profile&&profile.target) || "";
+  showDlg('<h3>每日热量目标</h3>'+
+    '<div class="seg" style="margin-bottom:14px">'+
+      '<button id="tm_i" class="'+(tgMode==="intake"?"on":"")+'" onclick="setTgMode(\'intake\')">按摄入</button>'+
+      '<button id="tm_n" class="'+(tgMode==="net"?"on":"")+'" onclick="setTgMode(\'net\')">按结余</button></div>'+
+    '<label class="f"><span id="tg_lb">'+
+      (tgMode==="net"?"每天的结余(负数=缺口,正数=盈余)":"每天摄入多少千卡")+'</span>'+
+      '<input class="in num" id="tg_v" type="number" inputmode="numeric" '+
+      'value="'+cur+'" placeholder="'+(tgMode==="net"?"-500":"1500")+'"></label>'+
+    '<div class="note" id="tg_hint" style="margin-top:0">'+
+      (tgMode==="net"
+        ? "按结余设目标时,每天可吃的量会跟着当天消耗浮动 —— 运动多的日子自动多给你一些额度。减重填负数,比如 −500;增重填正数,比如 +300。"
+        : "固定每天吃多少,不随消耗变化。")+'</div>'+
+    '<div class="err hide" id="tg_err"></div>'+
+    '<div class="acts"><button class="btn ghost" onclick="dismissDlg()">取消</button>'+
+    '<button class="btn teal" onclick="saveTarget()">保存</button></div>');
+}
+function saveTarget(){
+  const raw=(document.getElementById("tg_v").value||"").trim();
+  const err=document.getElementById("tg_err");
+  if(raw===""){ profile.target=0; save(K.profile,profile); dismissDlg(); render(); return; }
+  const v=Math.round(Number(raw));
+  if(!isFinite(v)){ err.textContent="请输入一个数字。"; err.classList.remove("hide"); return; }
+  if(tgMode==="intake"){
+    if(v<=0){ err.textContent="按摄入设目标时必须是正数。想设缺口请切到「按结余」。";
+      err.classList.remove("hide"); return; }
+    const floor=FLOOR[(profile&&profile.sex)==="male"?"male":"female"];
+    if(v<floor){ err.textContent="低于 "+floor+" 千卡就很难吃够蛋白质和微量营养素了,建议不要低于这个数。";
+      err.classList.remove("hide"); return; }
+  } else {
+    if(Math.abs(v)>1500){ err.textContent="结余绝对值超过 1500 不太现实,请重新确认。";
+      err.classList.remove("hide"); return; }
+  }
+  profile.target=v; profile.targetMode=tgMode;
+  save(K.profile,profile); dismissDlg(); render();
+}
+function applyTarget(v){ profile.target=v; profile.targetMode="intake";
+  save(K.profile,profile); toast("目标已设为每天摄入 "+v); tabTo("today"); }
 function toggleProtein(){ profile.showProtein=!profile.showProtein; save(K.profile,profile); render(); }
 function toggleGlass(){
   profile.glass = (profile.glass===false);
@@ -1212,7 +1296,8 @@ function drawAdd(){
       '<button class="btn ghost" style="margin-top:8px" onclick="backToList()">返回列表</button>';
   }
   else if(addTab==="search"){
-    inner='<input class="in" id="q" placeholder="搜索食物…" oninput="drawList(this.value)" autocomplete="off">'+
+    inner='<div class="searchwrap"><input class="in" id="q" placeholder="搜索食物…" '+
+      'oninput="drawList(this.value)" autocomplete="off"></div>'+
       '<div class="list" id="list"></div>';
   }
   else if(addTab==="quick"){
