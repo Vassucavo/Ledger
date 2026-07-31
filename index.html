@@ -14,7 +14,9 @@
   --sheetbg:#E4EAE3;
 }
 body.glass{--sheetbg:#F3F7F1}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;
+  scrollbar-width:none;-ms-overflow-style:none}
+::-webkit-scrollbar{width:0;height:0;display:none}
 html,body{height:100%}
 body{
   font-family:system-ui,-apple-system,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
@@ -101,7 +103,7 @@ body.overlay .tabbar,body.overlay .fab{display:none!important}
 
 .sheet-bg{position:fixed;inset:0;background:rgba(24,36,30,.5);z-index:50;
   display:flex;align-items:flex-end}
-.sheet{background:var(--canvas);width:100%;max-height:94vh;overflow-y:auto;
+.sheet{position:relative;background:var(--canvas);width:100%;max-height:94vh;overflow-y:auto;
   border-radius:18px 18px 0 0;padding:0 18px 22px}
 .sheet-head{display:flex;justify-content:space-between;align-items:center;
   margin-bottom:16px;padding-top:18px}
@@ -128,17 +130,19 @@ body.overlay .tabbar,body.overlay .fab{display:none!important}
 .pick .un{font-size:11px;color:var(--muted)}
 .grouphead{font-size:11px;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;font-weight:600}
 .list{margin-bottom:4px}
-/* 吸顶搜索框:上实下透的渐变,内容从下方滚过时自然淡出,
-   不再是一个硬邦邦的方框 */
+/* 吸顶搜索框。
+   没滚动时完全透明,和面板底色浑然一体,不会出现接缝;
+   一旦顶到面板上沿(.stuck),才淡入"上实下透"的渐变,
+   让下方滚过的内容自然消失。 */
 .searchwrap{position:sticky;top:0;z-index:3;
-  margin:0 -18px 2px;padding:10px 18px 18px;
+  margin:0 -18px 2px;padding:10px 18px 18px;background:none}
+.searchwrap::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:linear-gradient(180deg,
-    var(--sheetbg) 0%, var(--sheetbg) 58%, rgba(228,234,227,0) 100%);
-  pointer-events:none}
-.searchwrap .in{pointer-events:auto}
-body.glass .searchwrap{
-  background:linear-gradient(180deg,
-    var(--sheetbg) 0%, var(--sheetbg) 58%, rgba(243,247,241,0) 100%)}
+    var(--sheetbg) 0%, var(--sheetbg) 56%, transparent 100%);
+  opacity:0;transition:opacity .18s ease}
+.searchwrap.stuck::before{opacity:1}
+@media (prefers-reduced-motion:reduce){.searchwrap::before{transition:none}}
 .quick{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .quick button{flex:1 1 auto;min-width:58px;border:1px solid var(--line);background:var(--paper);
   color:var(--ink);border-radius:9px;padding:11px 0;font-size:14px;
@@ -298,7 +302,6 @@ body.glass .seg button.on{
         那会遮蔽 window 上的同名属性(v3 的导航失灵就是这么来的)。
    ===================================================================== */
 
-const APP_VERSION = "v7";
 const KCAL_PER_KG = 7700;
 const MIN_SPAN = 14;
 const FLOOR = { female:1200, male:1500 };
@@ -1056,19 +1059,6 @@ function setView(){
     '<button class="btn ghost" onclick="importData()">从备份恢复</button>'+
     '<div class="note">恢复时可以选「覆盖」或「合并」。合并保留两边记录,冲突时以备份为准。</div>';
 
-  // 诊断:返回键要正常工作,原生层必须是最新编译的
-  const A=nativeBridge();
-  const linked = !!(A && A.setCanGoBack);
-  html+='<h2 class="sec">关于</h2>'+
-    '<div class="row"><div class="body"><div class="name">页面版本</div>'+
-    '<div class="sub">'+APP_VERSION+'</div></div></div>'+
-    '<div class="row"><div class="body"><div class="name">返回键桥接</div>'+
-    '<div class="sub">'+(linked
-      ? "已连接 —— 系统返回键会逐级返回"
-      : (A ? "未连接 —— 需要重新上传 build-apk.yml 并重新编译 APK"
-           : "浏览器模式 —— 无原生返回键"))+'</div></div>'+
-    '<span class="kcal num" style="color:'+(linked?"var(--burn)":"var(--warn)")+'">'+
-    (linked?"OK":(A?"旧版":"—"))+'</span></div>';
   return html;
 }
 
@@ -1413,9 +1403,21 @@ function drawAdd(){
       '<button class="tab '+(addTab==="quick"?"on":"")+'" onclick="setTab(\'quick\')">快速录入</button>'+
       '<button class="tab '+(addTab==="label"?"on":"")+'" onclick="setTab(\'label\')">营养标签</button></div>')+
     inner+'</div></div>';
-  if(!picked && addTab==="search") drawList("");
+  if(!picked && addTab==="search"){ drawList(""); bindStickyFade(); }
 }
 function backToList(){ picked=null; drawAdd(); }
+
+/* 搜索框吸顶检测:顶到面板上沿时给它加 .stuck,渐变才淡入 */
+function bindStickyFade(){
+  const sheet=document.querySelector(".sheet");
+  const wrap=document.querySelector(".searchwrap");
+  if(!sheet||!wrap) return;
+  const update=function(){
+    wrap.classList.toggle("stuck", sheet.scrollTop > Math.max(0, wrap.offsetTop-1));
+  };
+  sheet.addEventListener("scroll", update, {passive:true});
+  update();
+}
 
 let quickUnit="x";
 function setQuickUnit(u){
