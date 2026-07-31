@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#E4EAE3">
 <title>记账本</title>
 <link rel="manifest" href="./manifest.json">
@@ -26,7 +26,7 @@ button{cursor:pointer}
 :focus-visible{outline:2px solid var(--burn);outline-offset:2px}
 
 .wrap{max-width:480px;margin:0 auto;
-  padding:16px 16px calc(var(--tabh) + 86px + env(safe-area-inset-bottom))}
+  padding:16px 16px calc(var(--tabh) + 86px)}
 
 .head{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:42px}
 .iconb{border:1px solid var(--line);background:var(--paper);border-radius:9px;
@@ -80,7 +80,7 @@ label.f span{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;
   display:grid;grid-template-columns:repeat(5,1fr);
   background:var(--paper);border-top:1px solid var(--line);
-  padding-bottom:env(safe-area-inset-bottom)}
+}
 .tabbar button{background:none;border:none;padding:8px 2px 9px;
   display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted)}
 .tabbar button.on{color:var(--burn)}
@@ -88,16 +88,17 @@ label.f span{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
 .tabbar svg{width:21px;height:21px;display:block}
 
 .fab{position:fixed;left:0;right:0;z-index:39;
-  bottom:calc(var(--tabh) + 14px + env(safe-area-inset-bottom));
+  bottom:calc(var(--tabh) + 14px);
   padding:0 16px;pointer-events:none}
 .fab .inner{max-width:480px;margin:0 auto;pointer-events:auto}
 .fab .btn{box-shadow:0 6px 18px rgba(24,36,30,.22)}
-body.kb .tabbar,body.kb .fab{display:none!important}
+body.kb .tabbar,body.kb .fab,
+body.overlay .tabbar,body.overlay .fab{display:none!important}
 
 .sheet-bg{position:fixed;inset:0;background:rgba(24,36,30,.5);z-index:50;
   display:flex;align-items:flex-end}
 .sheet{background:var(--canvas);width:100%;max-height:94vh;overflow-y:auto;
-  border-radius:18px 18px 0 0;padding:18px 18px calc(26px + env(safe-area-inset-bottom))}
+  border-radius:18px 18px 0 0;padding:18px 18px 22px}
 .sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .sheet-head h3{font-size:17px;font-weight:600}
 .tabs{display:flex;gap:6px;margin-bottom:16px}
@@ -164,6 +165,79 @@ body.kb .tabbar,body.kb .fab{display:none!important}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabh) + 72px);
   background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;
   z-index:90;max-width:82%;text-align:center}
+
+/* ---------------------------------------------------------------------
+   玻璃质感(设置里可关)
+   backdrop-filter 能做出毛玻璃、边缘高光和柔和阴影,
+   但 Apple 那种真正的折射/镜面流动依赖 GPU 着色器,网页做不到。
+   毛玻璃有性能开销,所以留了开关。
+   --------------------------------------------------------------------- */
+body.glass{
+  background:
+    radial-gradient(900px 520px at 8% -6%, #F4F8F0 0%, rgba(244,248,240,0) 62%),
+    radial-gradient(760px 460px at 108% 14%, #D6E5E1 0%, rgba(214,229,225,0) 58%),
+    radial-gradient(680px 520px at 50% 108%, #E9EFE6 0%, rgba(233,239,230,0) 60%),
+    linear-gradient(180deg,#E9EFE7 0%,#DDE6DB 100%);
+  background-attachment:fixed;
+}
+body.glass .card,
+body.glass .row,
+body.glass .pick,
+body.glass .switch,
+body.glass .callout,
+body.glass .in,
+body.glass .iconb,
+body.glass .datenav button,
+body.glass .quick button,
+body.glass .tabbar,
+body.glass .sheet,
+body.glass .dlg,
+body.glass .setup{
+  background:rgba(250,252,248,.58);
+  -webkit-backdrop-filter:blur(22px) saturate(175%);
+  backdrop-filter:blur(22px) saturate(175%);
+  border-color:rgba(255,255,255,.62);
+}
+body.glass .card,
+body.glass .sheet,
+body.glass .dlg,
+body.glass .tabbar{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),
+             inset 0 -1px 0 rgba(24,36,30,.05),
+             0 10px 30px rgba(24,36,30,.10);
+}
+body.glass .row,
+body.glass .pick,
+body.glass .switch,
+body.glass .callout{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 8px rgba(24,36,30,.05);
+}
+body.glass .sheet-bg,
+body.glass .dlg-bg{
+  background:rgba(24,36,30,.28);
+  -webkit-backdrop-filter:blur(3px);
+  backdrop-filter:blur(3px);
+}
+body.glass .btn{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 4px 14px rgba(24,36,30,.16);
+}
+body.glass .btn.ghost{
+  background:rgba(250,252,248,.5);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+}
+body.glass .quick button.on,
+body.glass .seg button.on,
+body.glass .tab.on{
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+/* 关掉动画偏好或性能不足时,玻璃会退化成不透明,依然可读 */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  body.glass .card, body.glass .row, body.glass .pick, body.glass .switch,
+  body.glass .callout, body.glass .in, body.glass .tabbar, body.glass .sheet,
+  body.glass .dlg, body.glass .setup{ background:var(--paper); }
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -485,34 +559,30 @@ function touchFood(name){
 }
 
 /* =====================================================================
-   导航栈
-   每打开一层就往 window.history 压一条,
-   系统返回键 → popstate → 关掉最上面一层。
-   应用内的取消/关闭按钮走 closeTop(),直接关闭并同步历史,
-   不依赖 popstate 的时序,所以不会出现"点了没反应"。
+   返回逻辑(层级式,不是浏览器那种"上一步")
+     第二级 = 浮层(添加餐食面板 / 对话框 / 身体数据页)
+     第一级 = 五个标签页
+   系统返回键:有浮层就关浮层;没有浮层且不在「今天」就回「今天」;
+              已经在「今天」就退出应用。
    ===================================================================== */
-let navStack = [];
-let ignorePop = false;
-
-function pushNav(closeFn){
-  navStack.push(closeFn);
-  try { window.history.pushState({n:navStack.length},""); } catch(e){}
+let overlays = [];
+function pushOverlay(closeFn){
+  overlays.push(closeFn);
+  document.body.classList.add("overlay");
 }
-/** 应用内关闭。返回 false 表示栈里没东西可关。 */
 function closeTop(){
-  if(!navStack.length) return false;
-  const closeFn = navStack.pop();
-  ignorePop = true;
-  setTimeout(function(){ ignorePop=false; },500);
-  try { window.history.back(); } catch(e){}
-  if(closeFn) closeFn();
+  if(!overlays.length) return false;
+  const fn = overlays.pop();
+  if(!overlays.length) document.body.classList.remove("overlay");
+  if(fn) fn();
   return true;
 }
-window.addEventListener("popstate", function(){
-  if(ignorePop){ ignorePop=false; return; }
-  const closeFn = navStack.pop();
-  if(closeFn) closeFn();
-});
+/* 原生层调用这个。返回 true = 已处理,false = 请退出应用 */
+window.appBack = function(){
+  if(closeTop()) return true;
+  if(view!=="today"){ view="today"; render(); window.scrollTo(0,0); return true; }
+  return false;
+};
 
 /* =====================================================================
    对话框
@@ -522,7 +592,7 @@ function rawCloseDlg(){ document.getElementById("dlg").innerHTML=""; dlgFields=[
 function showDlg(html){
   document.getElementById("dlg").innerHTML =
     '<div class="dlg-bg" onclick="if(event.target===this)dismissDlg()"><div class="dlg">'+html+'</div></div>';
-  pushNav(rawCloseDlg);
+  pushOverlay(rawCloseDlg);
   const first=document.querySelector("#dlg input");
   if(first) setTimeout(function(){ try{first.focus();}catch(e){} },140);
 }
@@ -602,9 +672,16 @@ function trend(){
   const w=weights.slice().sort(function(a,b){return a.date<b.date?-1:1;});
   return w.map(function(pt,i){
     const win=w.slice(Math.max(0,i-6),i+1);
-    return {date:pt.date,kg:pt.kg,
-      avg:win.reduce(function(s,x){return s+x.kg;},0)/win.length};
+    const bfWin=win.filter(function(x){return x.bf!=null;});
+    return {date:pt.date, kg:pt.kg, bf:pt.bf,
+      avg: win.reduce(function(s,x){return s+x.kg;},0)/win.length,
+      bfAvg: bfWin.length ? bfWin.reduce(function(s,x){return s+x.bf;},0)/bfWin.length : null,
+      lean: pt.bf!=null ? pt.kg*(1-pt.bf/100) : null };
   });
+}
+/* 瘦体重 = 体重 × (1 − 体脂率)。减脂期间这个数持平,说明掉的是脂肪不是肌肉。 */
+function leanTrend(){
+  return trend().filter(function(p){ return p.lean!=null; });
 }
 
 /* =====================================================================
@@ -631,22 +708,14 @@ function render(){
   const T = { today:["记账本",cnFull(curDate)], weight:["体重","趋势"],
     tune:["校准","你身体给出的真实数字"], logs:["记录","历史"],
     settings:["设置","偏好与备份"] }[view];
-  const canBack = navStack.length>0 || view!=="today";
   document.getElementById("app").innerHTML =
     '<div class="head">'+
-      (canBack?'<button class="iconb" onclick="headBack()" aria-label="返回">'+
-        '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" '+
-        'stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'+
-        '</button>':"")+
       '<div class="titles"><div class="eyebrow">'+T[0]+'</div><div class="title">'+T[1]+'</div></div>'+
     '</div>' +
     ({today:todayView,weight:weightView,tune:tuneView,logs:logsView,settings:setView}[view])();
 }
-function headBack(){ if(!closeTop()){ view="today"; render(); } }
 function tabTo(v){
   if(v===view){ if(v==="today") jumpToday(); return; }
-  const prevView=view, prevDate=curDate;
-  pushNav(function(){ view=prevView; curDate=prevDate; day=loadDay(curDate); render(); });
   view=v; render(); window.scrollTo(0,0);
 }
 
@@ -738,17 +807,56 @@ function weightView(){
       '<div class="big num" style="margin-bottom:4px">'+f1(last.avg)+
       ' <span style="font-size:15px;color:var(--muted)">kg</span></div>'+
       '<div class="note" style="margin:0">'+sub+'</div>'+spark(t)+'</div>';
+
+    // 体脂率与瘦体重
+    const lt=leanTrend();
+    if(lt.length){
+      const lastL=lt[lt.length-1];
+      html+='<div class="card" style="margin-bottom:10px">'+
+        '<div class="stat"><span class="l">最近体脂率</span>'+
+        '<span class="v num">'+f1(lastL.bf)+'%</span></div>'+
+        '<div class="stat"><span class="l">瘦体重</span>'+
+        '<span class="v num">'+f1(lastL.lean)+' kg</span></div>'+
+        '<div class="stat"><span class="l">脂肪量</span>'+
+        '<span class="v num">'+f1(lastL.kg-lastL.lean)+' kg</span></div>';
+      if(lt.length>1){
+        const first=lt[0];
+        const dLean=lastL.lean-first.lean, dFat=(lastL.kg-lastL.lean)-(first.kg-first.lean);
+        const sp=daysBetween(first.date,lastL.date);
+        html+='<div class="stat"><span class="l">'+sp+' 天内脂肪</span>'+
+          '<span class="v num" style="color:'+(dFat<=0?"var(--burn)":"var(--warn)")+'">'+
+          (dFat>=0?"+":"−")+f1(Math.abs(dFat))+' kg</span></div>'+
+          '<div class="stat"><span class="l">'+sp+' 天内瘦体重</span>'+
+          '<span class="v num" style="color:'+(dLean>=-0.5?"var(--burn)":"var(--warn)")+'">'+
+          (dLean>=0?"+":"−")+f1(Math.abs(dLean))+' kg</span></div>';
+        let verdict;
+        if(dFat<-0.3 && dLean>=-0.5)
+          verdict="脂肪在掉,瘦体重基本守住了 —— 这正是减脂想要的结果。";
+        else if(dFat<-0.3 && dLean<-0.5)
+          verdict="脂肪在掉,但瘦体重也掉了不少。可以考虑提高蛋白质摄入、加一些力量训练,或者把缺口调小一点。";
+        else if(dFat>=0.3)
+          verdict="脂肪量在上升。如果这不是你想要的,看看校准页给的目标是不是该调整了。";
+        else verdict="变化还很小,再记一段时间才看得出方向。";
+        html+='</div><div class="callout"><h4>怎么读这几个数</h4><p>'+verdict+'</p></div>';
+      } else {
+        html+='</div>';
+      }
+      html+='<div class="note" style="margin-top:0">家用体脂秤走的是生物电阻抗,'+
+        '受水分、进食、体温影响很大,<b>绝对值可能偏差 5 个百分点以上</b> —— 别太当真那个百分比。'+
+        '有价值的是同一台秤、同样条件下的变化方向,以及由它算出的瘦体重。</div>';
+    }
   }
   html+='<button class="btn teal" onclick="addWeight()">记录体重</button>'+
     '<div class="note">尽量固定时间称,最好早上起床后。'+
-    '日常水分和食物造成的波动远大于真正的脂肪变化 —— 看那条实线,不要看散点。</div>';
+    '日常水分和食物造成的波动远大于真正的脂肪变化 —— 看那条实线,不要看散点。'+
+    '体脂率可以留空,不影响其他功能。</div>';
   html+='<h2 class="sec">全部记录 <span style="font-weight:400">'+weights.length+' 条</span></h2>';
   if(!weights.length) html+='<div class="empty">还没有记录。<br>'+
     '以前自己记过的数据也能补录 —— 记录时可以选日期。<br>'+
     '有两条相隔 14 天以上的记录,校准功能就能用了。</div>';
   else weights.slice().sort(function(a,b){return a.date<b.date?1:-1;}).forEach(function(w){
-    html+=row(cnFull(w.date),"点击可修改",f1(w.kg)+" kg","var(--ink)",
-      "delWeight('"+w.date+"')","editWeight('"+w.date+"')"); });
+    html+=row(cnFull(w.date), w.bf!=null ? "体脂 "+f1(w.bf)+"% · 瘦体重 "+f1(w.kg*(1-w.bf/100))+"kg" : "点击可修改",
+      f1(w.kg)+" kg","var(--ink)","delWeight('"+w.date+"')","editWeight('"+w.date+"')"); });
   return html;
 }
 function spark(t){
@@ -913,17 +1021,27 @@ function editTarget(){
 }
 function applyTarget(v){ profile.target=v; save(K.profile,profile); toast("目标已设为 "+v); tabTo("today"); }
 function toggleProtein(){ profile.showProtein=!profile.showProtein; save(K.profile,profile); render(); }
+function toggleGlass(){
+  profile.glass = (profile.glass===false);
+  save(K.profile,profile); applyGlass(); render();
+}
+function applyGlass(){
+  document.body.classList.toggle("glass", !profile || profile.glass!==false);
+}
 
 function addWeight(){
-  const lastKg = weights.length ? weights[weights.length-1].kg : "";
+  const last = weights.length ? weights[weights.length-1] : null;
   form("记录体重",[{k:"date",label:"日期",type:"date",value:todayKey()},
-    {k:"kg",label:"体重(kg)",type:"number",step:"0.1",value:lastKg,ph:"65.0"}],
+    {k:"kg",label:"体重(kg)",type:"number",step:"0.1",value:last?last.kg:"",ph:"65.0"},
+    {k:"bf",label:"体脂率 %(可留空)",type:"number",step:"0.1",
+      value:(last&&last.bf)?last.bf:"",ph:"22.0"}],
     function(o){ return saveWeight(o); },"保存");
 }
 function editWeight(date){
   const w=weights.filter(function(x){return x.date===date;})[0]; if(!w) return;
   form("修改这条记录",[{k:"date",label:"日期",type:"date",value:w.date},
-    {k:"kg",label:"体重(kg)",type:"number",step:"0.1",value:w.kg}],
+    {k:"kg",label:"体重(kg)",type:"number",step:"0.1",value:w.kg},
+    {k:"bf",label:"体脂率 %(可留空)",type:"number",step:"0.1",value:w.bf||""}],
     function(o){ return saveWeight(o,date); },"保存");
 }
 /* 先校验,校验不过一个字节都不动 */
@@ -932,8 +1050,15 @@ function saveWeight(o,replaceDate){
   if(!kg||kg<20||kg>400){ formError("请输入 20 到 400 之间的体重(kg)。"); return false; }
   if(!/^\d{4}-\d{2}-\d{2}$/.test(o.date)){ formError("请选择日期。"); return false; }
   if(daysBetween(o.date,todayKey())<0){ formError("不能记录未来的日期。"); return false; }
+  let bf=null;
+  if(String(o.bf||"").trim()!==""){
+    bf=Math.round(Number(o.bf)*10)/10;
+    if(!isFinite(bf)||bf<3||bf>70){ formError("体脂率请填 3 到 70 之间,或者留空。"); return false; }
+  }
+  const rec={date:o.date,kg:kg};
+  if(bf!==null) rec.bf=bf;
   weights=weights.filter(function(w){ return w.date!==o.date && w.date!==replaceDate; })
-    .concat([{date:o.date,kg:kg}]).sort(function(a,b){return a.date<b.date?-1:1;});
+    .concat([rec]).sort(function(a,b){return a.date<b.date?-1:1;});
   save(K.weights,weights);
   if(profile && weights[weights.length-1].date===o.date){
     profile.weightKg=Math.round(kg); save(K.profile,profile);
@@ -1016,7 +1141,7 @@ function importData(){
    ===================================================================== */
 let addTab="search", picked=null, amount=100, listRows=[];
 
-function openAdd(){ addTab="search"; picked=null; drawAdd(); pushNav(rawCloseSheet); }
+function openAdd(){ addTab="search"; picked=null; drawAdd(); pushOverlay(rawCloseSheet); }
 function rawCloseSheet(){ document.getElementById("sheet").innerHTML=""; picked=null; }
 function dismissSheet(){ if(!closeTop()) rawCloseSheet(); }
 function setTab(t){ addTab=t; picked=null; drawAdd(); }
@@ -1029,6 +1154,7 @@ function setAmount(v){
   amount=v;
   const el=document.getElementById("amt");
   if(el) el.value=v;
+  drawQuickState();   // v4 漏了这一句,所以高亮一直停在 100g
   updatePreview();
 }
 function readAmount(v){
@@ -1250,7 +1376,7 @@ let sf={};
 function openSetup(){
   sf = profile ? Object.assign({},profile) : {sex:"female",units:"metric"};
   drawSetup();
-  if(profile) pushNav(rawCloseSetup);
+  if(profile) pushOverlay(rawCloseSetup);
 }
 function rawCloseSetup(){ document.getElementById("setup").innerHTML=""; }
 function dismissSetup(){ if(!closeTop()) rawCloseSetup(); }
@@ -1340,12 +1466,13 @@ function saveSetup(){
 
 /* 跨天自动切到新的一天(仅当停留在"今天"且没有弹层时) */
 setInterval(function(){
-  if(view==="today" && !navStack.length && curDate!==todayKey()
+  if(view==="today" && !overlays.length && curDate!==todayKey()
      && daysBetween(curDate,todayKey())===1){
     curDate=todayKey(); day=loadDay(curDate); render();
   }
 },60000);
 
+applyGlass();
 render();
 if(!profile) openSetup();
 if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
