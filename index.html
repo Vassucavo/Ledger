@@ -5,42 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4EAE3">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Ledger</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
 :root{
   --canvas:#E4EAE3; --paper:#F8FAF6; --ink:#18241E; --muted:#78877E;
   --line:#C9D3C6; --intake:#A87C15; --burn:#1D6B67; --warn:#8C4A2F;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{
-  font-family:'Archivo',system-ui,-apple-system,sans-serif;
-  background:var(--canvas); color:var(--ink);
-  min-height:100vh; font-size:15px; line-height:1.4;
+  font-family:'Archivo',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--canvas); color:var(--ink); min-height:100vh;
+  font-size:15px; line-height:1.4; -webkit-user-select:none; user-select:none;
   padding-bottom:env(safe-area-inset-bottom);
-  -webkit-user-select:none; user-select:none;
 }
 input,button,select{font-family:inherit;font-size:16px}
-.num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums;
+  font-family:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--burn);outline-offset:2px}
 
 .wrap{max-width:480px;margin:0 auto;padding:20px 16px 130px}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;gap:8px}
 .eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 .date{font-size:17px;font-weight:600}
-.chipbtn{background:none;border:1px solid var(--line);border-radius:9px;padding:7px 11px;
-  font-size:13px;color:var(--muted);margin-left:6px}
+.navs{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end}
+.chipbtn{background:none;border:1px solid var(--line);border-radius:9px;padding:6px 10px;
+  font-size:12px;color:var(--muted)}
 .chipbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
 .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px}
-.big{font-size:44px;font-weight:600;line-height:1.05;margin-bottom:16px}
+.big{font-size:42px;font-weight:600;line-height:1.05}
 .bar-label{display:flex;justify-content:space-between;margin-bottom:4px}
-.bar-track{height:10px;background:var(--line);border-radius:5px;overflow:hidden;margin-bottom:12px}
+.bar-track{height:9px;background:var(--line);border-radius:5px;overflow:hidden;margin-bottom:11px}
 .bar-fill{height:100%;border-radius:5px;transition:width .4s ease}
 
 h2.sec{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
@@ -52,7 +50,7 @@ h2.sec{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--
 .row .sub{font-size:11px;color:var(--muted)}
 .row .kcal{font-weight:600;font-size:14px}
 .x{border:none;background:none;color:var(--muted);font-size:20px;line-height:1;padding:0 2px}
-.empty{font-size:14px;color:var(--muted);padding:14px 2px}
+.empty{font-size:14px;color:var(--muted);padding:14px 2px;line-height:1.5}
 
 .in{background:var(--paper);border:1px solid var(--line);color:var(--ink);
   border-radius:10px;padding:11px 12px;width:100%;-webkit-user-select:text;user-select:text}
@@ -65,9 +63,9 @@ label.f span{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
 .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
 .btn.gold{background:var(--intake)}
 .btn.teal{background:var(--burn)}
-.btn[disabled]{background:var(--muted)}
 
-.dock{position:fixed;bottom:0;left:0;right:0;padding:14px 16px calc(24px + env(safe-area-inset-bottom));
+.dock{position:fixed;bottom:0;left:0;right:0;
+  padding:14px 16px calc(24px + env(safe-area-inset-bottom));
   background:linear-gradient(to top,var(--canvas) 62%,transparent)}
 .dock .wrap2{max-width:480px;margin:0 auto}
 
@@ -100,39 +98,58 @@ label.f span{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
 .check input{width:19px;height:19px;accent-color:var(--burn)}
 .tag{font-size:11px;color:var(--burn);font-weight:600}
 
-.setup{position:fixed;inset:0;background:var(--canvas);z-index:60;overflow-y:auto;padding:22px 16px}
-.setup .inner{max-width:480px;margin:0 auto}
 .seg{display:flex;gap:8px;margin-bottom:14px}
 .seg button{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);
   border-radius:10px;padding:11px 0;font-size:14px;font-weight:600}
 .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .switch{display:flex;justify-content:space-between;align-items:center;padding:13px;
-  background:var(--paper);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;gap:12px}
 .switch .t{font-size:14px}
 .switch .d{font-size:11px;color:var(--muted)}
-.toggle{width:48px;height:28px;border-radius:14px;background:var(--line);border:none;position:relative;flex:0 0 auto}
+.toggle{width:48px;height:28px;border-radius:14px;background:var(--line);border:none;
+  position:relative;flex:0 0 auto}
 .toggle.on{background:var(--burn)}
 .toggle i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;
   background:#fff;transition:left .18s ease}
 .toggle.on i{left:23px}
+
+.setup{position:fixed;inset:0;background:var(--canvas);z-index:60;overflow-y:auto;padding:22px 16px}
+.setup .inner{max-width:480px;margin:0 auto}
+.spark{width:100%;height:110px;display:block}
+.callout{background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--burn);
+  border-radius:10px;padding:14px;margin-bottom:10px}
+.callout.warn{border-left-color:var(--warn)}
+.callout h4{font-size:13px;font-weight:600;margin-bottom:6px}
+.callout p{font-size:13px;color:var(--muted);line-height:1.5}
+.stat{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;
+  border-bottom:1px solid var(--line)}
+.stat:last-child{border-bottom:none}
+.stat .l{font-size:13px;color:var(--muted)}
+.stat .v{font-size:15px;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-
 <div class="wrap" id="app"></div>
-
 <div class="dock" id="dock">
   <div class="wrap2"><button class="btn" onclick="openAdd()">Add a meal</button></div>
 </div>
-
 <div id="sheet"></div>
 <div id="setup"></div>
 
 <script>
-/* ============================================================
-   1. BUILT-IN FOOD LIST  (approximate values per listed portion)
-   ============================================================ */
+/* =====================================================================
+   LEDGER v2
+   Burn model: BMR (Mifflin-St Jeor) + active calories from your watch.
+   Calibration: compares logged intake against real weight change to
+   derive your actual TDEE, which beats any formula.
+   ===================================================================== */
+
+const KCAL_PER_KG = 7700;      // energy in ~1kg of body tissue
+const MIN_SPAN_DAYS = 14;      // shortest window worth trusting
+const FLOOR = { female: 1200, male: 1500 };
+
+/* ---------- built-in foods: [group, name, kcal, protein g] ---------- */
 const FOODS = [
 ["Staples","White rice, 1 bowl (150g)",195,4],
 ["Staples","Brown rice, 1 bowl (150g)",165,4],
@@ -232,266 +249,410 @@ const FOODS = [
 ["Snacks","Protein bar",200,20]
 ];
 
-/* ============================================================
-   2. STORAGE
-   ============================================================ */
-const K = { profile:"cl.profile", mine:"cl.mine", hist:"cl.history", day:d=>"cl.day."+d };
+/* ---------- storage ---------- */
+const K = { profile:"cl.profile", mine:"cl.mine", hist:"cl.history",
+            weights:"cl.weights", day:d=>"cl.day."+d };
+function load(k,f){ try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;} }
+function save(k,v){ try{localStorage.setItem(k,JSON.stringify(v));return true;}
+  catch(e){alert("Couldn't save \u2014 storage may be full.");return false;} }
 
-function load(key, fallback){
-  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-  catch(e){ return fallback; }
-}
-function save(key, val){
-  try { localStorage.setItem(key, JSON.stringify(val)); return true; }
-  catch(e){ alert("Couldn't save. Your phone's storage for this site may be full."); return false; }
-}
-
-const todayKey = () => {
-  const d = new Date();
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-};
-const prettyDate = k => {
-  const [y,m,d] = k.split("-").map(Number);
-  return new Date(y,m-1,d).toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
-};
-const shortDate = k => {
-  const [y,m,d] = k.split("-").map(Number);
-  return new Date(y,m-1,d).toLocaleDateString(undefined,{month:"short",day:"numeric"});
-};
+const todayKey = () => { const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const dParse = k => { const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); };
+const prettyDate = k => dParse(k).toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
+const shortDate  = k => dParse(k).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+const daysBetween = (a,b) => Math.round((dParse(b)-dParse(a))/86400000);
 const uid = () => Math.random().toString(36).slice(2,9);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const n = v => Math.max(0, Math.round(Number(v)||0));
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const n = v => Math.max(0,Math.round(Number(v)||0));
+const f1 = v => (Math.round(v*10)/10).toFixed(1);
 
-/* ============================================================
-   3. STATE
-   ============================================================ */
-let profile = load(K.profile, null);
-let mine    = load(K.mine, []);
-let history = load(K.hist, {});
-let day     = load(K.day(todayKey()), null) || { date: todayKey(), food:[], watchActive:0, burn:[] };
+/* ---------- state ---------- */
+let profile = load(K.profile,null);
+let mine    = load(K.mine,[]);
+let history = load(K.hist,{});
+let weights = load(K.weights,[]);
+let day     = load(K.day(todayKey()),null) || {date:todayKey(),food:[],watchActive:0,burn:[]};
 let view    = "today";
 
 function bmr(){
-  if(!profile || !profile.weightKg || !profile.heightCm || !profile.age) return 0;
+  if(!profile||!profile.weightKg||!profile.heightCm||!profile.age) return 0;
   const b = 10*profile.weightKg + 6.25*profile.heightCm - 5*profile.age;
-  return Math.round(profile.sex === "female" ? b - 161 : b + 5);
+  return Math.round(profile.sex==="female" ? b-161 : b+5);
 }
 const eaten   = () => day.food.reduce((s,f)=>s+f.kcal,0);
 const protein = () => day.food.reduce((s,f)=>s+(f.protein||0),0);
 const burned  = () => bmr() + (day.watchActive||0) + day.burn.reduce((s,b)=>s+b.kcal,0);
+const target  = () => (profile && profile.target) ? profile.target : 0;
 
 function persist(){
   save(K.day(day.date), day);
-  history[day.date] = { in: eaten(), out: burned(), p: protein() };
-  save(K.hist, history);
+  history[day.date] = { in:eaten(), out:burned(), p:protein(), act:day.watchActive||0 };
+  save(K.hist,history);
   render();
 }
-function rememberFood(name, kcal, p){
+function rememberFood(name,kcal,p){
   if(!name) return;
   const key = name.trim().toLowerCase();
-  const i = mine.findIndex(f => f.name.trim().toLowerCase() === key);
-  const rec = { id: i>-1 ? mine[i].id : uid(), name: name.trim(), kcal, protein: p };
-  if(i>-1) mine[i] = rec; else mine.unshift(rec);
-  save(K.mine, mine);
+  const i = mine.findIndex(f=>f.name.trim().toLowerCase()===key);
+  const rec = { id: i>-1?mine[i].id:uid(), name:name.trim(), kcal, protein:p };
+  if(i>-1) mine[i]=rec; else mine.unshift(rec);
+  save(K.mine,mine);
 }
 
-/* ============================================================
-   4. TODAY / HISTORY / SETTINGS VIEWS
-   ============================================================ */
+/* =====================================================================
+   CALIBRATION  — the core idea:
+   If you ate an average of A per day over N days and your weight changed
+   by D kg, then your true daily burn was A - (D * 7700 / N).
+   ===================================================================== */
+function calibrate(){
+  const w = weights.slice().sort((a,b)=>a.date<b.date?-1:1);
+  if(w.length < 2) return { ok:false, reason:"need2", have:w.length };
+
+  const first = w[0], last = w[w.length-1];
+  const span = daysBetween(first.date, last.date);
+  if(span < MIN_SPAN_DAYS) return { ok:false, reason:"short", span:span };
+
+  // logged intake days that fall inside the window
+  const days = Object.keys(history).filter(k =>
+    k >= first.date && k <= last.date && history[k].in > 0);
+  const coverage = days.length / span;
+  if(coverage < 0.6) return { ok:false, reason:"sparse", logged:days.length, span:span };
+
+  const avgIn  = days.reduce((s,k)=>s+history[k].in,0) / days.length;
+  const avgOut = days.reduce((s,k)=>s+history[k].out,0) / days.length;
+  const deltaKg = last.kg - first.kg;
+  const realTDEE = Math.round(avgIn - (deltaKg * KCAL_PER_KG / span));
+
+  return { ok:true, span, days:days.length, coverage,
+    avgIn:Math.round(avgIn), avgOut:Math.round(avgOut),
+    deltaKg, realTDEE, gap: realTDEE - Math.round(avgOut),
+    perWeek: deltaKg / (span/7) };
+}
+function suggestTarget(realTDEE, rateKgWeek){
+  const raw = Math.round(realTDEE - (rateKgWeek * KCAL_PER_KG / 7));
+  const floor = FLOOR[(profile&&profile.sex)==="male" ? "male" : "female"];
+  return { value: Math.max(raw, floor), clamped: raw < floor, floor };
+}
+/* smoothed weight trend — daily noise is bigger than the signal */
+function trend(){
+  const w = weights.slice().sort((a,b)=>a.date<b.date?-1:1);
+  return w.map((pt,i) => {
+    const win = w.slice(Math.max(0,i-6), i+1);
+    return { date:pt.date, kg:pt.kg, avg: win.reduce((s,x)=>s+x.kg,0)/win.length };
+  });
+}
+
+/* =====================================================================
+   VIEWS
+   ===================================================================== */
 function render(){
-  document.getElementById("dock").className = view === "today" ? "dock" : "dock hide";
-  const el = document.getElementById("app");
-  el.innerHTML = topbar() + (view==="today" ? todayView() : view==="history" ? histView() : setView());
+  document.getElementById("dock").className = view==="today" ? "dock" : "dock hide";
+  const titles = { today:["Today",prettyDate(day.date)], weight:["Weight","Your trend"],
+    tune:["Calibration","What your body actually says"], history:["Record","Your history"],
+    settings:["Settings","Your setup"] };
+  const t = titles[view];
+  document.getElementById("app").innerHTML = `
+    <div class="topbar">
+      <div><div class="eyebrow">${t[0]}</div><div class="date">${t[1]}</div></div>
+      <div class="navs">
+        <button class="chipbtn ${view==="weight"?"on":""}" onclick="go('weight')">Weight</button>
+        <button class="chipbtn ${view==="tune"?"on":""}" onclick="go('tune')">Calibrate</button>
+        <button class="chipbtn ${view==="history"?"on":""}" onclick="go('history')">History</button>
+        <button class="chipbtn ${view==="settings"?"on":""}" onclick="go('settings')">Settings</button>
+      </div>
+    </div>` +
+    ({today:todayView, weight:weightView, tune:tuneView,
+      history:histView, settings:setView}[view])();
 }
+function go(v){ view = (view===v)?"today":v; render(); window.scrollTo(0,0); }
 
-function topbar(){
-  return `<div class="topbar">
-    <div>
-      <div class="eyebrow">${view==="today"?"Today":view==="history"?"Record":"Settings"}</div>
-      <div class="date">${view==="today"?prettyDate(day.date):view==="history"?"Your history":"Your setup"}</div>
-    </div>
-    <div>
-      <button class="chipbtn ${view==="history"?"on":""}" onclick="go('history')">History</button>
-      <button class="chipbtn ${view==="settings"?"on":""}" onclick="go('settings')">Settings</button>
-    </div>
-  </div>`;
+function row(name,sub,val,color,onDel){
+  return `<div class="row"><div class="body"><div class="name">${esc(name)}</div>
+    ${sub?`<div class="sub">${esc(sub)}</div>`:""}</div>
+    <span class="kcal num" style="color:${color||"var(--ink)"}">${val}</span>
+    ${onDel?`<button class="x" onclick="${onDel}" aria-label="Remove">\u00d7</button>`:""}</div>`;
 }
-function go(v){ view = (view===v) ? "today" : v; render(); window.scrollTo(0,0); }
 
 function todayView(){
-  const e = eaten(), b = burned(), net = e - b, span = Math.max(e,b,1);
-  const showP = profile && profile.showProtein;
-  const target = profile && profile.target ? profile.target : 0;
+  const e=eaten(), b=burned(), net=e-b, span=Math.max(e,b,1);
+  const showP = profile&&profile.showProtein, tg=target();
+  let html = `<div class="card">`;
 
-  let html = `<div class="card">
-    <div class="eyebrow">${net>=0?"Surplus":"Deficit"}</div>
-    <div class="big num" style="color:${net>=0?"var(--intake)":"var(--burn)"}">
-      ${net>=0?"+":"\u2212"}${Math.abs(net).toLocaleString()}
-    </div>
-    <div class="bar-label"><span class="eyebrow">Eaten</span>
+  if(tg){
+    const left = tg-e;
+    html += `<div class="eyebrow">${left>=0?"Left to eat today":"Over target"}</div>
+      <div class="big num" style="color:${left>=0?"var(--burn)":"var(--warn)"};margin-bottom:6px">
+        ${Math.abs(left).toLocaleString()}</div>
+      <div class="note" style="margin:0 0 16px">
+        ${e.toLocaleString()} of ${tg.toLocaleString()} eaten</div>`;
+  } else {
+    html += `<div class="eyebrow">${net>=0?"Surplus":"Deficit"}</div>
+      <div class="big num" style="color:${net>=0?"var(--intake)":"var(--burn)"};margin-bottom:16px">
+        ${net>=0?"+":"\u2212"}${Math.abs(net).toLocaleString()}</div>`;
+  }
+
+  html += `<div class="bar-label"><span class="eyebrow">Eaten</span>
       <span class="num" style="color:var(--intake);font-size:13px;font-weight:600">${e.toLocaleString()}</span></div>
     <div class="bar-track"><div class="bar-fill" style="width:${e/span*100}%;background:var(--intake)"></div></div>
     <div class="bar-label"><span class="eyebrow">Burned</span>
       <span class="num" style="color:var(--burn);font-size:13px;font-weight:600">${b.toLocaleString()}</span></div>
-    <div class="bar-track" style="margin-bottom:0"><div class="bar-fill" style="width:${b/span*100}%;background:var(--burn)"></div></div>
-    ${target ? `<div class="note">Target ${target.toLocaleString()} eaten \u2014 ${e<=target
-        ? (target-e).toLocaleString()+" left" : (e-target).toLocaleString()+" over"}</div>` : ""}
-    ${showP ? `<div class="note">Protein today: <b class="num">${protein()}g</b></div>` : ""}
+    <div class="bar-track" style="margin-bottom:0">
+      <div class="bar-fill" style="width:${b/span*100}%;background:var(--burn)"></div></div>
+    ${tg?`<div class="note">Balance today: ${net>=0?"+":"\u2212"}${Math.abs(net).toLocaleString()}</div>`:""}
+    ${showP?`<div class="note">Protein: <b class="num">${protein()}g</b></div>`:""}
   </div>`;
 
   html += `<h2 class="sec"><span>Burned</span><span class="num" style="color:var(--burn)">${b.toLocaleString()}</span></h2>`;
-  html += row("Resting burn", "Breathing, thinking, digesting \u2014 all day", bmr(), "var(--burn)");
-  html += `<div class="row">
-    <div class="body"><div class="name">Active calories</div>
-      <div class="sub">From your watch \u2014 the active/move number, not total</div></div>
-    <input class="in num" type="number" inputmode="numeric" placeholder="0" style="width:84px;padding:7px 9px;text-align:right"
-      value="${day.watchActive||""}" onchange="setActive(this.value)">
-  </div>`;
-  day.burn.forEach(x => { html += row(x.label, null, x.kcal, "var(--burn)", `delBurn('${x.id}')`); });
+  html += row("Resting burn","Breathing, thinking, digesting \u2014 all day",bmr().toLocaleString(),"var(--burn)");
+  html += `<div class="row"><div class="body"><div class="name">Active calories</div>
+    <div class="sub">From your watch \u2014 the active/move number, not total</div></div>
+    <input class="in num" type="number" inputmode="numeric" placeholder="0"
+      style="width:84px;padding:7px 9px;text-align:right"
+      value="${day.watchActive||""}" onchange="setActive(this.value)"></div>`;
+  day.burn.forEach(x=>{ html += row(x.label,null,x.kcal.toLocaleString(),"var(--burn)",`delBurn('${x.id}')`); });
   html += `<button class="btn ghost" style="margin-top:6px" onclick="openBurn()">Add another workout</button>`;
 
   html += `<h2 class="sec"><span>Eaten</span><span class="num" style="color:var(--intake)">${e.toLocaleString()}</span></h2>`;
   if(!day.food.length) html += `<div class="empty">Nothing logged yet. Tap "Add a meal" to start.</div>`;
-  else day.food.forEach(f => {
-    const sub = showP && f.protein ? f.protein+"g protein" : null;
-    html += row(f.name, sub, f.kcal, "var(--intake)", `delFood('${f.id}')`);
-  });
+  else day.food.forEach(f => html += row(f.name,
+    showP&&f.protein ? f.protein+"g protein" : null,
+    f.kcal.toLocaleString(),"var(--intake)",`delFood('${f.id}')`));
   return html;
 }
 
-function row(name, sub, kcal, color, onDel){
-  return `<div class="row"><div class="body">
-    <div class="name">${esc(name)}</div>${sub?`<div class="sub">${esc(sub)}</div>`:""}
-    </div><span class="kcal num" style="color:${color||"var(--ink)"}">${kcal.toLocaleString()}</span>
-    ${onDel?`<button class="x" onclick="${onDel}" aria-label="Remove">\u00d7</button>`:""}</div>`;
+function weightView(){
+  const t = trend();
+  let html = "";
+  if(t.length){
+    const last = t[t.length-1];
+    let sub = "";
+    if(t.length>1){
+      const d = last.avg - t[0].avg, sp = daysBetween(t[0].date,last.date);
+      if(sp>0) sub = `${d>=0?"+":"\u2212"}${f1(Math.abs(d))} kg over ${sp} days`;
+    }
+    html += `<div class="card" style="margin-bottom:10px">
+      <div class="eyebrow">Trend weight</div>
+      <div class="big num" style="margin-bottom:4px">${f1(last.avg)} <span style="font-size:15px;color:var(--muted)">kg</span></div>
+      <div class="note" style="margin:0">${sub||"Keep weighing in to build a trend"}</div>
+      ${spark(t)}</div>`;
+  }
+  html += `<button class="btn teal" onclick="openWeigh()">Add a weigh-in</button>`;
+  html += `<div class="note">Weigh yourself at the same time of day, ideally first thing.
+    Day-to-day swings from water and food are far bigger than real fat change \u2014
+    the smoothed line is the one to read, not the dots.</div>`;
+
+  html += `<h2 class="sec">Weigh-ins</h2>`;
+  if(!weights.length) html += `<div class="empty">No weigh-ins yet. Two, at least two weeks apart,
+    unlock calibration.</div>`;
+  else weights.slice().sort((a,b)=>a.date<b.date?1:-1).forEach(w =>
+    html += row(shortDate(w.date),null,f1(w.kg)+" kg","var(--ink)",`delWeight('${w.date}')`));
+  return html;
+}
+
+function spark(t){
+  if(t.length<2) return "";
+  const W=440,H=110,P=8;
+  const xs=t.map(p=>dParse(p.date).getTime());
+  const all=t.map(p=>p.kg).concat(t.map(p=>p.avg));
+  const lo=Math.min(...all), hi=Math.max(...all), rng=(hi-lo)||1;
+  const x=i=>P+((xs[i]-xs[0])/((xs[xs.length-1]-xs[0])||1))*(W-2*P);
+  const y=v=>H-P-((v-lo)/rng)*(H-2*P);
+  const line=t.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(p.avg).toFixed(1)}`).join(" ");
+  const dots=t.map((p,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(p.kg).toFixed(1)}" r="2.5"
+    fill="var(--muted)" opacity=".55"/>`).join("");
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"
+    role="img" aria-label="Weight trend">${dots}
+    <path d="${line}" fill="none" stroke="var(--burn)" stroke-width="2.5"
+      stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+function tuneView(){
+  const c = calibrate();
+  if(!c.ok){
+    const msg = {
+      need2:`Calibration needs at least two weigh-ins. You have ${c.have||0}.`,
+      short:`Your weigh-ins span ${c.span} days. Calibration waits for ${MIN_SPAN_DAYS},
+             because shorter windows are mostly water weight.`,
+      sparse:`You've logged intake on ${c.logged} of ${c.span} days. Calibration needs
+              about 60% coverage to mean anything.`
+    }[c.reason];
+    return `<div class="callout"><h4>Not enough data yet</h4><p>${msg}</p></div>
+      <div class="empty">Once it has enough, this screen compares what you actually ate
+      against what your weight actually did, and works backwards to your real daily burn.
+      That observed number beats every formula.</div>`;
+  }
+
+  const formulaOff = c.gap;
+  let html = `<div class="card" style="margin-bottom:10px">
+    <div class="eyebrow">Your real daily burn</div>
+    <div class="big num" style="color:var(--burn);margin-bottom:10px">${c.realTDEE.toLocaleString()}</div>
+    <div class="stat"><span class="l">Average eaten</span><span class="v num">${c.avgIn.toLocaleString()}</span></div>
+    <div class="stat"><span class="l">Weight change</span>
+      <span class="v num">${c.deltaKg>=0?"+":"\u2212"}${f1(Math.abs(c.deltaKg))} kg</span></div>
+    <div class="stat"><span class="l">Over</span><span class="v num">${c.span} days</span></div>
+    <div class="stat"><span class="l">Rate</span>
+      <span class="v num">${c.perWeek>=0?"+":"\u2212"}${f1(Math.abs(c.perWeek))} kg/week</span></div>
+  </div>`;
+
+  html += `<div class="callout"><h4>Formula vs reality</h4>
+    <p>The app's calculated burn averaged <b>${c.avgOut.toLocaleString()}</b>.
+    Your body says <b>${c.realTDEE.toLocaleString()}</b> \u2014
+    ${formulaOff===0 ? "an exact match, which is rare." :
+      `the formula is <b>${Math.abs(formulaOff).toLocaleString()} ${formulaOff>0?"under":"over"}</b>.
+       ${formulaOff>0 ? "Expected, since BMR plus watch calories misses the energy spent digesting food."
+                      : "Watches commonly overestimate active calories, which would explain it."}`}
+    </p></div>`;
+
+  html += `<h2 class="sec">Set a target from this</h2>`;
+  [[0.25,"Slow \u2014 easiest to keep up"],[0.5,"Moderate"]].forEach(([rate,label])=>{
+    const s = suggestTarget(c.realTDEE, rate);
+    html += `<div class="row"><div class="body">
+      <div class="name">${rate} kg / week</div>
+      <div class="sub">${s.clamped ? "Raised to the "+s.floor+" floor" : label}</div></div>
+      <span class="kcal num" style="color:var(--burn)">${s.value.toLocaleString()}</span>
+      <button class="chipbtn" onclick="applyTarget(${s.value})">Use</button></div>`;
+  });
+  html += `<div class="note">Recalculate every few weeks. As you lose weight your burn drops,
+    so a target that worked in month one will stall in month three.
+    ${c.coverage<0.85 ? "Your logging covered "+Math.round(c.coverage*100)+"% of days \u2014 the more complete it is, the sharper this number." : ""}</div>`;
+  return html;
 }
 
 function histView(){
-  const keys = Object.keys(history).sort().reverse().slice(0,30);
-  if(!keys.length) return `<div class="empty">Nothing recorded yet. Your days will stack up here.</div>`;
+  const keys = Object.keys(history).sort().reverse().slice(0,60);
+  if(!keys.length) return `<div class="empty">Nothing recorded yet.</div>`;
   const recent = keys.slice(0,7);
-  const avg = Math.round(recent.reduce((s,k)=>s+(history[k].in-history[k].out),0)/recent.length);
-  let html = `<div class="card" style="margin-bottom:8px">
+  const avgNet = Math.round(recent.reduce((s,k)=>s+(history[k].in-history[k].out),0)/recent.length);
+  const avgIn  = Math.round(recent.reduce((s,k)=>s+history[k].in,0)/recent.length);
+  let html = `<div class="card" style="margin-bottom:10px">
     <div class="eyebrow">7-day average balance</div>
-    <div class="big num" style="margin-bottom:0;color:${avg>=0?"var(--intake)":"var(--burn)"}">
-      ${avg>=0?"+":"\u2212"}${Math.abs(avg).toLocaleString()}</div>
-    <div class="note">Daily swings are normal \u2014 the average over a week tells you more than any single day.</div>
-  </div>`;
-  keys.forEach(k => {
-    const h = history[k], net = h.in - h.out;
+    <div class="big num" style="color:${avgNet>=0?"var(--intake)":"var(--burn)"}">
+      ${avgNet>=0?"+":"\u2212"}${Math.abs(avgNet).toLocaleString()}</div>
+    <div class="note">Averaging ${avgIn.toLocaleString()} eaten per day.
+      Single days swing wildly; the week is the honest unit.</div></div>`;
+  keys.forEach(k=>{ const h=history[k], net=h.in-h.out;
     html += row(shortDate(k), h.in.toLocaleString()+" in \u00b7 "+h.out.toLocaleString()+" out",
-      net, net>=0?"var(--intake)":"var(--burn)");
-  });
+      (net>=0?"+":"\u2212")+Math.abs(net).toLocaleString(), net>=0?"var(--intake)":"var(--burn)"); });
   return html;
 }
 
 function setView(){
   const p = profile||{};
   let html = `<h2 class="sec">Body stats</h2>`;
-  html += row("Resting burn", `${p.sex==="female"?"Female":"Male"}, ${p.age}, ${p.heightCm}cm, ${p.weightKg}kg`, bmr(), "var(--burn)");
+  html += row("Resting burn",
+    `${p.sex==="female"?"Female":"Male"}, ${p.age}, ${p.heightCm}cm, ${p.weightKg}kg`,
+    bmr().toLocaleString(),"var(--burn)");
   html += `<button class="btn ghost" style="margin-top:6px" onclick="openSetup()">Edit my stats</button>`;
 
   html += `<h2 class="sec">Options</h2>
   <div class="switch"><div><div class="t">Track protein</div>
-    <div class="d">Adds one optional field per food</div></div>
+    <div class="d">One optional field per food</div></div>
     <button class="toggle ${p.showProtein?"on":""}" onclick="toggleProtein()" aria-label="Track protein"><i></i></button></div>
-  <label class="f" style="margin-top:8px"><span>Daily calorie target (optional \u2014 leave blank for none)</span>
+  <label class="f" style="margin-top:8px"><span>Daily calorie target (blank for none)</span>
     <input class="in num" type="number" inputmode="numeric" placeholder="none"
-      value="${p.target||""}" onchange="setTarget(this.value)"></label>`;
+      value="${p.target||""}" onchange="setTarget(this.value)"></label>
+  <div class="note" style="margin-top:-4px">Calibrate can set this for you from your own data.</div>`;
 
   html += `<h2 class="sec">My saved foods (${mine.length})</h2>`;
-  if(!mine.length) html += `<div class="empty">Foods you enter yourself get saved here for one-tap reuse.</div>`;
-  else mine.forEach(f => html += row(f.name, f.protein?f.protein+"g protein":null, f.kcal, "var(--intake)", `delMine('${f.id}')`));
+  if(!mine.length) html += `<div class="empty">Foods you type in get saved here for one-tap reuse.</div>`;
+  else mine.forEach(f=>html += row(f.name, f.protein?f.protein+"g protein":null,
+    f.kcal.toLocaleString(),"var(--intake)",`delMine('${f.id}')`));
 
   html += `<h2 class="sec">Backup</h2>
-  <div class="note" style="margin:0 0 10px">Your data lives only on this phone. Clearing your browser data would erase it, so export a copy now and then.</div>
+  <div class="note" style="margin:0 0 10px">Everything is stored on this phone only.
+    Export a copy now and then \u2014 and if you're moving over from the web version,
+    export there and restore here.</div>
   <button class="btn ghost" style="margin-bottom:8px" onclick="exportData()">Export my data</button>
   <button class="btn ghost" onclick="importData()">Restore from a backup</button>`;
   return html;
 }
 
-/* ============================================================
-   5. ACTIONS
-   ============================================================ */
-function setActive(v){ day.watchActive = n(v); persist(); }
-function delFood(id){ day.food = day.food.filter(f=>f.id!==id); persist(); }
-function delBurn(id){ day.burn = day.burn.filter(b=>b.id!==id); persist(); }
-function delMine(id){ mine = mine.filter(f=>f.id!==id); save(K.mine,mine); render(); }
-function setTarget(v){ profile.target = n(v)||0; save(K.profile,profile); render(); }
-function toggleProtein(){ profile.showProtein = !profile.showProtein; save(K.profile,profile); render(); }
+/* ---------- actions ---------- */
+function setActive(v){ day.watchActive=n(v); persist(); }
+function delFood(id){ day.food=day.food.filter(f=>f.id!==id); persist(); }
+function delBurn(id){ day.burn=day.burn.filter(b=>b.id!==id); persist(); }
+function delMine(id){ mine=mine.filter(f=>f.id!==id); save(K.mine,mine); render(); }
+function setTarget(v){ profile.target=n(v)||0; save(K.profile,profile); render(); }
+function applyTarget(v){ profile.target=v; save(K.profile,profile); view="today"; render(); window.scrollTo(0,0); }
+function toggleProtein(){ profile.showProtein=!profile.showProtein; save(K.profile,profile); render(); }
+function delWeight(date){ weights=weights.filter(w=>w.date!==date); save(K.weights,weights); render(); }
 
 function openBurn(){
-  const label = prompt("What did you do?");
-  if(!label) return;
-  const kc = prompt("How many calories did it burn?");
-  if(kc===null) return;
-  day.burn.push({ id:uid(), label:label.trim(), kcal:n(kc) });
-  persist();
+  const label = prompt("What did you do?"); if(!label) return;
+  const kc = prompt("How many calories did it burn?"); if(kc===null) return;
+  day.burn.push({id:uid(),label:label.trim(),kcal:n(kc)}); persist();
+}
+function openWeigh(){
+  const v = prompt("Weight in kg", weights.length ? f1(weights[weights.length-1].kg) : "");
+  if(v===null) return;
+  const kg = Math.round(Number(v)*10)/10;
+  if(!kg || kg<20 || kg>400){ alert("That doesn't look like a weight in kg."); return; }
+  const d = todayKey();
+  weights = weights.filter(w=>w.date!==d).concat([{date:d,kg}]).sort((a,b)=>a.date<b.date?-1:1);
+  save(K.weights,weights);
+  if(profile){ profile.weightKg = Math.round(kg); save(K.profile,profile); }
+  render();
 }
 
+/* ---------- backup: uses the Android bridge when installed ---------- */
+const NATIVE = () => (typeof Android!=="undefined" && Android && Android.saveBackup);
 function exportData(){
-  const dump = { v:1, exported:new Date().toISOString(), profile, mine, history, days:{} };
-  Object.keys(history).forEach(k => { const d = load(K.day(k), null); if(d) dump.days[k] = d; });
-  const blob = new Blob([JSON.stringify(dump,null,2)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "ledger-backup-"+todayKey()+".json";
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  const dump = { v:2, exported:new Date().toISOString(), profile, mine, history, weights, days:{} };
+  Object.keys(history).forEach(k=>{ const d=load(K.day(k),null); if(d) dump.days[k]=d; });
+  const text = JSON.stringify(dump,null,2);
+  const name = "ledger-backup-"+todayKey()+".json";
+  if(NATIVE()){ Android.saveBackup(name, text); return; }
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type:"application/json"}));
+  a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
+function applyBackup(txt){
+  try{
+    const d=JSON.parse(txt);
+    if(!d.profile) throw new Error("bad");
+    if(!confirm("This replaces everything currently in the app. Continue?")) return;
+    profile=d.profile; mine=d.mine||[]; history=d.history||{}; weights=d.weights||[];
+    save(K.profile,profile); save(K.mine,mine); save(K.hist,history); save(K.weights,weights);
+    Object.keys(d.days||{}).forEach(k=>save(K.day(k),d.days[k]));
+    day = load(K.day(todayKey()),null) || {date:todayKey(),food:[],watchActive:0,burn:[]};
+    view="today"; render(); alert("Restored.");
+  }catch(e){ alert("That file isn't a Ledger backup."); }
+}
+window.applyBackup = applyBackup;   // Android calls this after picking a file
 function importData(){
-  const inp = document.createElement("input");
-  inp.type = "file"; inp.accept = "application/json,.json";
-  inp.onchange = () => {
-    const f = inp.files[0]; if(!f) return;
-    const r = new FileReader();
-    r.onload = () => {
-      try {
-        const d = JSON.parse(r.result);
-        if(!d.profile) throw new Error("bad");
-        if(!confirm("This replaces everything currently in the app. Continue?")) return;
-        profile = d.profile; mine = d.mine||[]; history = d.history||{};
-        save(K.profile,profile); save(K.mine,mine); save(K.hist,history);
-        Object.keys(d.days||{}).forEach(k => save(K.day(k), d.days[k]));
-        day = load(K.day(todayKey()), null) || { date:todayKey(), food:[], watchActive:0, burn:[] };
-        view = "today"; render();
-        alert("Restored.");
-      } catch(e){ alert("That file isn't a Ledger backup."); }
-    };
-    r.readAsText(f);
-  };
+  if(NATIVE() && Android.pickBackup){ Android.pickBackup(); return; }
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept="application/json,.json";
+  inp.onchange=()=>{ const f=inp.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>applyBackup(r.result); r.readAsText(f); };
   inp.click();
 }
 
-/* ============================================================
-   6. ADD-FOOD SHEET
-   ============================================================ */
-let addTab = "search", picked = null, mult = 1;
-
+/* =====================================================================
+   ADD-FOOD SHEET
+   ===================================================================== */
+let addTab="search", picked=null, mult=1, listRows=[];
 function openAdd(){ addTab="search"; picked=null; mult=1; drawAdd(); }
-function closeSheet(){ document.getElementById("sheet").innerHTML = ""; }
+function closeSheet(){ document.getElementById("sheet").innerHTML=""; }
 function setTab(t){ addTab=t; picked=null; drawAdd(); }
 function setMult(m){ mult=m; drawAdd(); }
+function pickIdx(i){ picked=listRows[i]; mult=1; drawAdd(); }
 
 function drawAdd(){
-  const showP = profile && profile.showProtein;
-  let inner = "";
-
+  const showP = profile&&profile.showProtein;
+  let inner="";
   if(picked){
-    const kc = Math.round(picked.kcal*mult), pr = Math.round((picked.protein||0)*mult);
+    const kc=Math.round(picked.kcal*mult), pr=Math.round((picked.protein||0)*mult);
     inner = `<div class="card" style="margin-bottom:14px">
       <div style="font-size:15px;font-weight:600;margin-bottom:12px">${esc(picked.name)}</div>
-      <div class="mult">
-        ${[0.5,1,1.5,2].map(m=>`<button class="${mult===m?"on":""}" onclick="setMult(${m})">${m}\u00d7</button>`).join("")}
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:baseline">
-        <span style="font-size:13px;color:var(--muted)">Calories</span>
-        <span class="num" style="font-size:26px;font-weight:600;color:var(--intake)">${kc.toLocaleString()}</span>
-      </div>
-      ${showP?`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px">
-        <span style="font-size:13px;color:var(--muted)">Protein</span>
-        <span class="num" style="font-size:15px;font-weight:600">${pr}g</span></div>`:""}
-    </div>
+      <div class="mult">${[0.5,1,1.5,2].map(m=>
+        `<button class="${mult===m?"on":""}" onclick="setMult(${m})">${m}\u00d7</button>`).join("")}</div>
+      <div class="stat"><span class="l">Calories</span>
+        <span class="num" style="font-size:26px;font-weight:600;color:var(--intake)">${kc.toLocaleString()}</span></div>
+      ${showP?`<div class="stat"><span class="l">Protein</span>
+        <span class="v num">${pr}g</span></div>`:""}</div>
     <button class="btn gold" onclick="commitPicked()">Add to today</button>
     <button class="btn ghost" style="margin-top:8px" onclick="picked=null;drawAdd()">Back</button>`;
   }
@@ -501,179 +662,144 @@ function drawAdd(){
   }
   else if(addTab==="quick"){
     inner = `<label class="f"><span>What was it?</span>
-        <input class="in" id="qn" placeholder="Chicken salad from the deli"></label>
-      <div class="two">
-        <label class="f"><span>Calories</span>
-          <input class="in num" id="qk" type="number" inputmode="numeric" placeholder="0"></label>
+        <input class="in" id="qn" placeholder="Canteen lunch"></label>
+      <div class="two"><label class="f"><span>Calories</span>
+        <input class="in num" id="qk" type="number" inputmode="numeric" placeholder="0"></label>
         ${showP?`<label class="f"><span>Protein (g)</span>
-          <input class="in num" id="qp" type="number" inputmode="numeric" placeholder="0"></label>`:""}
-      </div>
+        <input class="in num" id="qp" type="number" inputmode="numeric" placeholder="0"></label>`:""}</div>
       <div class="check"><input type="checkbox" id="qs" checked>
         <label for="qs">Save to my foods for next time</label></div>
       <div class="err hide" id="qerr"></div>
       <button class="btn gold" onclick="commitQuick()">Add to today</button>
-      <div class="note">Photograph the meal, ask any AI chat for a calorie estimate, then type the number here.
-        Tap "Copy prompt" below to get a wording that returns clean numbers.</div>
+      <div class="note">Photograph the meal, ask any AI chat to estimate it, type the number here.</div>
       <button class="btn ghost" style="margin-top:8px" onclick="copyPrompt()">Copy prompt for the AI</button>`;
   }
   else {
     inner = `<label class="f"><span>Product name</span>
         <input class="in" id="ln" placeholder="Greek yogurt, strawberry"></label>
-      <div class="two">
-        <label class="f"><span>Calories per serving</span>
-          <input class="in num" id="lk" type="number" inputmode="numeric" placeholder="0" oninput="labelPreview()"></label>
+      <div class="two"><label class="f"><span>Calories per serving</span>
+        <input class="in num" id="lk" type="number" inputmode="numeric" placeholder="0" oninput="labelPreview()"></label>
         ${showP?`<label class="f"><span>Protein per serving (g)</span>
-          <input class="in num" id="lp" type="number" inputmode="numeric" placeholder="0" oninput="labelPreview()"></label>`:""}
-      </div>
+        <input class="in num" id="lp" type="number" inputmode="numeric" placeholder="0"></label>`:""}</div>
       <label class="f"><span>How many servings did you eat?</span>
         <input class="in num" id="ls" type="number" inputmode="decimal" step="0.25" value="1" oninput="labelPreview()"></label>
       <div class="card" style="margin-bottom:12px;padding:14px">
-        <div style="display:flex;justify-content:space-between;align-items:baseline">
-          <span style="font-size:13px;color:var(--muted)">That comes to</span>
-          <span class="num" id="lprev" style="font-size:26px;font-weight:600;color:var(--intake)">0</span>
-        </div></div>
+        <div class="stat"><span class="l">That comes to</span>
+        <span class="num" id="lprev" style="font-size:26px;font-weight:600;color:var(--intake)">0</span></div></div>
       <div class="check"><input type="checkbox" id="lsv" checked>
         <label for="lsv">Save to my foods for next time</label></div>
       <div class="err hide" id="lerr"></div>
       <button class="btn gold" onclick="commitLabel()">Add to today</button>
-      <div class="note">Read the two numbers straight off the panel. Watch the serving size \u2014
-        a bag that looks like one portion is often listed as two or three.</div>`;
+      <div class="note">Watch the serving size \u2014 a bag that looks like one portion
+        is often listed as two or three.</div>`;
   }
-
   document.getElementById("sheet").innerHTML = `
     <div class="sheet-bg" onclick="if(event.target===this)closeSheet()">
-      <div class="sheet">
-        <div class="sheet-head"><h3>Add a meal</h3>
-          <button class="x" style="font-size:26px" onclick="closeSheet()">\u00d7</button></div>
+      <div class="sheet"><div class="sheet-head"><h3>Add a meal</h3>
+        <button class="x" style="font-size:26px" onclick="closeSheet()">\u00d7</button></div>
         ${picked?"":`<div class="tabs">
           <button class="tab ${addTab==="search"?"on":""}" onclick="setTab('search')">Search</button>
           <button class="tab ${addTab==="quick"?"on":""}" onclick="setTab('quick')">Quick add</button>
-          <button class="tab ${addTab==="label"?"on":""}" onclick="setTab('label')">Label</button>
-        </div>`}
-        ${inner}
-      </div>
-    </div>`;
+          <button class="tab ${addTab==="label"?"on":""}" onclick="setTab('label')">Label</button></div>`}
+        ${inner}</div></div>`;
   if(!picked && addTab==="search") drawList("");
 }
-
-let listRows = [];
 function drawList(q){
-  q = (q||"").trim().toLowerCase();
-  const el = document.getElementById("list"); if(!el) return;
-  listRows = [];
-  let html = "";
-  const mn = mine.filter(f => !q || f.name.toLowerCase().includes(q));
-  if(mn.length){
-    html += `<div class="grouphead">My foods</div>`;
-    mn.forEach(f => html += pickBtn({name:f.name, kcal:f.kcal, protein:f.protein}, true));
-  }
-  const groups = {};
-  FOODS.forEach(([g,name,kc,p]) => {
+  q=(q||"").trim().toLowerCase();
+  const el=document.getElementById("list"); if(!el) return;
+  listRows=[]; let html="";
+  const mn = mine.filter(f=>!q||f.name.toLowerCase().includes(q));
+  if(mn.length){ html+=`<div class="grouphead">My foods</div>`;
+    mn.forEach(f=>html+=pickBtn({name:f.name,kcal:f.kcal,protein:f.protein},true)); }
+  const groups={};
+  FOODS.forEach(([g,name,kc,p])=>{
     if(q && !name.toLowerCase().includes(q) && !g.toLowerCase().includes(q)) return;
-    (groups[g] = groups[g] || []).push({name, kcal:kc, protein:p});
-  });
-  Object.keys(groups).forEach(g => {
-    html += `<div class="grouphead">${g}</div>`;
-    groups[g].forEach(f => html += pickBtn(f, false));
-  });
-  if(!html) html = `<div class="empty">No match. Use "Quick add" to enter it yourself \u2014
-    it'll be saved for next time.</div>`;
-  el.innerHTML = html;
+    (groups[g]=groups[g]||[]).push({name,kcal:kc,protein:p}); });
+  Object.keys(groups).forEach(g=>{ html+=`<div class="grouphead">${g}</div>`;
+    groups[g].forEach(f=>html+=pickBtn(f,false)); });
+  if(!html) html=`<div class="empty">No match. Use "Quick add" to enter it \u2014 it'll be saved.</div>`;
+  el.innerHTML=html;
 }
-function pickBtn(f, isMine){
-  const i = listRows.push(f) - 1;
-  const showP = profile && profile.showProtein;
-  return `<button class="pick" onclick="pickIdx(${i})">
-    <div class="body"><div class="name">${esc(f.name)}</div>
-      ${isMine?`<div class="sub"><span class="tag">Saved</span></div>`
-        :showP&&f.protein?`<div class="sub">${f.protein}g protein</div>`:""}</div>
+function pickBtn(f,isMine){
+  const i=listRows.push(f)-1, showP=profile&&profile.showProtein;
+  return `<button class="pick" onclick="pickIdx(${i})"><div class="body">
+    <div class="name">${esc(f.name)}</div>
+    ${isMine?`<div class="sub"><span class="tag">Saved</span></div>`
+      :showP&&f.protein?`<div class="sub">${f.protein}g protein</div>`:""}</div>
     <span class="kcal num" style="color:var(--intake)">${f.kcal}</span></button>`;
 }
-function pickIdx(i){ picked = listRows[i]; mult = 1; drawAdd(); }
-
-function commitPicked(){
-  if(!picked) return;
-  commit(picked.name, Math.round(picked.kcal*mult), Math.round((picked.protein||0)*mult));
-}
-function commit(name, kcal, prot){
-  day.food.push({ id:uid(), name, kcal:n(kcal), protein:n(prot), ts:Date.now() });
+function commit(name,kcal,prot){
+  day.food.push({id:uid(),name,kcal:n(kcal),protein:n(prot),ts:Date.now()});
   closeSheet(); persist();
 }
+function commitPicked(){ if(picked)
+  commit(picked.name, Math.round(picked.kcal*mult), Math.round((picked.protein||0)*mult)); }
 function commitQuick(){
-  const name = (document.getElementById("qn").value||"").trim();
-  const kc = n(document.getElementById("qk").value);
-  const pEl = document.getElementById("qp");
-  const pr = pEl ? n(pEl.value) : 0;
-  const err = document.getElementById("qerr");
-  if(!name || !kc){ err.textContent = "Give it a name and a calorie number."; err.classList.remove("hide"); return; }
-  if(document.getElementById("qs").checked) rememberFood(name, kc, pr);
-  commit(name, kc, pr);
+  const name=(document.getElementById("qn").value||"").trim();
+  const kc=n(document.getElementById("qk").value);
+  const pEl=document.getElementById("qp"), pr=pEl?n(pEl.value):0;
+  const err=document.getElementById("qerr");
+  if(!name||!kc){ err.textContent="Give it a name and a calorie number."; err.classList.remove("hide"); return; }
+  if(document.getElementById("qs").checked) rememberFood(name,kc,pr);
+  commit(name,kc,pr);
 }
 function labelPreview(){
-  const kc = n(document.getElementById("lk").value);
-  const sv = Number(document.getElementById("ls").value)||0;
-  const el = document.getElementById("lprev");
-  if(el) el.textContent = Math.round(kc*sv).toLocaleString();
+  const kc=n(document.getElementById("lk").value);
+  const sv=Number(document.getElementById("ls").value)||0;
+  const el=document.getElementById("lprev"); if(el) el.textContent=Math.round(kc*sv).toLocaleString();
 }
 function commitLabel(){
-  const name = (document.getElementById("ln").value||"").trim();
-  const kc = n(document.getElementById("lk").value);
-  const sv = Number(document.getElementById("ls").value)||0;
-  const pEl = document.getElementById("lp");
-  const pr = pEl ? n(pEl.value) : 0;
-  const err = document.getElementById("lerr");
-  if(!name || !kc || !sv){ err.textContent = "Fill in the name, the calories per serving, and the servings."; err.classList.remove("hide"); return; }
-  if(document.getElementById("lsv").checked) rememberFood(name+" (1 serving)", kc, pr);
-  commit(name, Math.round(kc*sv), Math.round(pr*sv));
+  const name=(document.getElementById("ln").value||"").trim();
+  const kc=n(document.getElementById("lk").value);
+  const sv=Number(document.getElementById("ls").value)||0;
+  const pEl=document.getElementById("lp"), pr=pEl?n(pEl.value):0;
+  const err=document.getElementById("lerr");
+  if(!name||!kc||!sv){ err.textContent="Fill in the name, calories per serving, and servings."; err.classList.remove("hide"); return; }
+  if(document.getElementById("lsv").checked) rememberFood(name+" (1 serving)",kc,pr);
+  commit(name,Math.round(kc*sv),Math.round(pr*sv));
 }
 function copyPrompt(){
-  const t = "Look at this photo of my meal. Estimate the portion sizes and tell me the total calories"
-    + ((profile&&profile.showProtein)?" and total protein in grams":"")
-    + ". Reply with just a short list of items with their numbers, then the total. Say what portion size you assumed.";
-  navigator.clipboard.writeText(t).then(
-    () => alert("Prompt copied. Paste it with your photo into any AI chat."),
-    () => prompt("Copy this prompt:", t)
-  );
+  const t="Look at this photo of my meal. Estimate the portion sizes and tell me the total calories"
+    +((profile&&profile.showProtein)?" and total protein in grams":"")
+    +". Reply with a short list of items with their numbers, then the total. Say what portion size you assumed.";
+  if(navigator.clipboard) navigator.clipboard.writeText(t)
+    .then(()=>alert("Prompt copied."),()=>prompt("Copy this:",t));
+  else prompt("Copy this:",t);
 }
 
-/* ============================================================
-   7. SETUP SCREEN
-   ============================================================ */
-let sf = {};
-function openSetup(){
-  sf = profile ? Object.assign({}, profile) : { sex:"female", units:"metric" };
-  drawSetup();
-}
+/* =====================================================================
+   SETUP
+   ===================================================================== */
+let sf={};
+function openSetup(){ sf = profile?Object.assign({},profile):{sex:"female",units:"metric"}; drawSetup(); }
 function setSF(k,v){ sf[k]=v; drawSetup(); }
 function readSF(k,v){ sf[k]=v; drawSetupPreview(); }
 function sfBmr(){
-  const h = sf.units==="metric" ? Number(sf.heightCm)||0 : (Number(sf.heightIn)||0)*2.54;
-  const w = sf.units==="metric" ? Number(sf.weightKg)||0 : (Number(sf.weightLb)||0)*0.4536;
-  const a = Number(sf.age)||0;
+  const h=sf.units==="metric"?Number(sf.heightCm)||0:(Number(sf.heightIn)||0)*2.54;
+  const w=sf.units==="metric"?Number(sf.weightKg)||0:(Number(sf.weightLb)||0)*0.4536;
+  const a=Number(sf.age)||0;
   if(!h||!w||!a) return 0;
-  const b = 10*w + 6.25*h - 5*a;
-  return Math.round(sf.sex==="female" ? b-161 : b+5);
+  const b=10*w+6.25*h-5*a;
+  return Math.round(sf.sex==="female"?b-161:b+5);
 }
 function drawSetupPreview(){
-  const el = document.getElementById("bmrPrev"); if(!el) return;
-  const v = sfBmr();
-  el.innerHTML = v ? `<div class="card" style="margin-bottom:16px">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:3px">Your resting burn</div>
-      <div class="num" style="font-size:26px;font-weight:600;color:var(--burn)">
-        ${v.toLocaleString()} <span style="font-size:13px;color:var(--muted)">cal / day</span></div></div>` : "";
+  const el=document.getElementById("bmrPrev"); if(!el) return;
+  const v=sfBmr();
+  el.innerHTML = v?`<div class="card" style="margin-bottom:16px">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:3px">Your resting burn</div>
+    <div class="num" style="font-size:26px;font-weight:600;color:var(--burn)">${v.toLocaleString()}
+      <span style="font-size:13px;color:var(--muted)">cal / day</span></div></div>`:"";
 }
 function drawSetup(){
-  const metric = sf.units === "metric";
+  const metric = sf.units==="metric";
   document.getElementById("setup").innerHTML = `<div class="setup"><div class="inner">
     <div class="sheet-head"><h3>Your body stats</h3>
       ${profile?`<button class="x" style="font-size:26px" onclick="closeSetup()">\u00d7</button>`:""}</div>
-    <p class="note" style="margin:0 0 18px">These calculate your resting burn \u2014 the calories your body
-      spends breathing, thinking, and digesting before you move at all.</p>
-    <div class="seg">
-      <button class="${metric?"on":""}" onclick="setSF('units','metric')">kg / cm</button>
+    <p class="note" style="margin:0 0 18px">These give your resting burn \u2014 the energy spent
+      breathing, thinking, and repairing cells before you move at all.</p>
+    <div class="seg"><button class="${metric?"on":""}" onclick="setSF('units','metric')">kg / cm</button>
       <button class="${!metric?"on":""}" onclick="setSF('units','imperial')">lb / in</button></div>
-    <div class="seg">
-      <button class="${sf.sex==="female"?"on":""}" onclick="setSF('sex','female')">Female</button>
+    <div class="seg"><button class="${sf.sex==="female"?"on":""}" onclick="setSF('sex','female')">Female</button>
       <button class="${sf.sex==="male"?"on":""}" onclick="setSF('sex','male')">Male</button></div>
     <label class="f"><span>Age</span><input class="in num" type="number" inputmode="numeric"
       placeholder="30" value="${sf.age||""}" oninput="readSF('age',this.value)"></label>
@@ -688,43 +814,32 @@ function drawSetup(){
           placeholder="145" value="${sf.weightLb||""}" oninput="readSF('weightLb',this.value)"></label>`}
     <div id="bmrPrev"></div>
     <button class="btn" onclick="saveSetup()">Save stats</button>
-    <p class="note">Calculated with the Mifflin\u2013St Jeor equation. It's a population estimate,
-      so your real number may differ by a few hundred calories. Update your weight every few weeks.</p>
+    <p class="note">Mifflin\u2013St Jeor. It's a population average, so treat it as a starting
+      hypothesis \u2014 the Calibrate screen will replace it with your own observed number
+      once you've logged a few weeks.</p>
   </div></div>`;
   drawSetupPreview();
 }
-function closeSetup(){ document.getElementById("setup").innerHTML = ""; }
+function closeSetup(){ document.getElementById("setup").innerHTML=""; }
 function saveSetup(){
   if(!sfBmr()){ alert("Fill in your age, height, and weight first."); return; }
-  const metric = sf.units === "metric";
-  profile = {
-    sex: sf.sex, units: sf.units, age: Number(sf.age),
-    heightCm: Math.round(metric ? Number(sf.heightCm) : Number(sf.heightIn)*2.54),
-    weightKg: Math.round(metric ? Number(sf.weightKg) : Number(sf.weightLb)*0.4536),
-    heightIn: sf.heightIn, weightLb: sf.weightLb,
-    showProtein: profile ? !!profile.showProtein : false,
-    target: profile ? profile.target||0 : 0
-  };
-  save(K.profile, profile);
-  closeSetup(); persist();
+  const metric = sf.units==="metric";
+  profile = { sex:sf.sex, units:sf.units, age:Number(sf.age),
+    heightCm:Math.round(metric?Number(sf.heightCm):Number(sf.heightIn)*2.54),
+    weightKg:Math.round(metric?Number(sf.weightKg):Number(sf.weightLb)*0.4536),
+    heightIn:sf.heightIn, weightLb:sf.weightLb,
+    showProtein: profile?!!profile.showProtein:false,
+    target: profile?profile.target||0:0 };
+  save(K.profile,profile); closeSetup(); persist();
 }
 
-/* ============================================================
-   8. BOOT
-   ============================================================ */
-// Roll over to a new day if the app was left open overnight
-setInterval(() => {
-  if(day.date !== todayKey()){
-    day = load(K.day(todayKey()), null) || { date:todayKey(), food:[], watchActive:0, burn:[] };
-    render();
-  }
-}, 60000);
-
+/* ---------- boot ---------- */
+setInterval(()=>{ if(day.date!==todayKey()){
+  day = load(K.day(todayKey()),null)||{date:todayKey(),food:[],watchActive:0,burn:[]}; render(); } },60000);
 render();
 if(!profile) openSetup();
-
-if("serviceWorker" in navigator){
-  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 }
 </script>
 </body>
